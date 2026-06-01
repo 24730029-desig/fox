@@ -3,1002 +3,2211 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NEO-DOROTHY 2099 — 잃어버린 동기화</title>
+<title>FOX SISTER : Gene Containment</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Noto+Sans+KR:wght@300;400;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@700;900&family=Noto+Sans+KR:wght@300;400;700&display=swap');
-
+/* ═══════════════════════════════════════════════
+   CSS 변수 — 색상·폰트 한 곳에서 관리
+═══════════════════════════════════════════════ */
 :root {
-  --bg:     #080b0f;
-  --panel:  rgba(10,13,18,0.97);
-  --green:  #00FF66;
-  --red:    #FF003C;
-  --amber:  #F39C12;
-  --cyan:   #3498DB;
-  --purple: #bf5fff;
-  --txt:    #c8c8c0;
-  --txt-dim:#525250;
-  --mono:   'Share Tech Mono','Courier New',monospace;
-  --orb:    'Orbitron',sans-serif;
-  --body:   'Noto Sans KR',sans-serif;
-  --hdr-h:  62px;
+  --색_배경:       #020508;
+  --색_패널:       #040d14;
+  --색_패널2:      #050f18;
+  --색_경계:       #0d2a3a;
+  --색_경계_밝음:  #2a6d96;
+  --색_시안:       #00e5ff;
+  --색_시안_dim:   #004d5a;
+  --색_빨강:       #ff2d4a;
+  --색_빨강_dim:   #3a0010;
+  --색_앰버:       #ffb300;
+  --색_앰버_dim:   #3a2800;
+  --색_녹색:       #00ff88;
+  --색_녹색_dim:   #003322;
+  --색_보라:       #cc44ff;
+  --색_텍스트:     #ddeef8;
+  --색_음소거:     #8bbfd4;
+  --글로우_시안:   0 0 8px #00e5ff55, 0 0 24px #00e5ff18;
+  --글로우_빨강:   0 0 8px #ff2d4a55, 0 0 24px #ff2d4a18;
+  --폰트_모노:     'Share Tech Mono', monospace;
+  --폰트_UI:       'Orbitron', sans-serif;
+  --폰트_본문:     'Noto Sans KR', sans-serif;
+
+  /* 헤더 높이 — 계산에 재사용 */
+  --헤더_높이:     58px;
 }
 
-*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-html, body { height:100%; overflow:hidden; background:var(--bg); color:var(--txt); font-family:var(--body); -webkit-font-smoothing:antialiased; user-select:none; }
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-/* ── HUD ── */
-#hud {
-  height: var(--hdr-h); display:flex; align-items:center;
-  padding:0 22px; gap:20px;
-  background: rgba(6,8,12,0.98);
-  border-bottom: 2px solid rgba(255,0,60,0.5);
-  position:relative; z-index:100; flex-shrink:0;
-  transition: border-bottom-color .4s;
-}
-.core-active #hud { border-bottom-color:rgba(191,95,255,.55); }
-
-#hud-logo {
-  border:2px solid var(--red); padding:7px 16px;
-  font-family:var(--orb); font-size:13px; font-weight:700;
-  color:var(--amber); letter-spacing:3px; white-space:nowrap;
-  text-shadow:0 0 10px rgba(243,156,18,.45); flex-shrink:0;
-  animation:logoGlitch 8s ease-in-out infinite;
-}
-@keyframes logoGlitch {
-  0%,85%,100%{transform:none;filter:none;}
-  86%{transform:translateX(-3px);filter:hue-rotate(90deg);}
-  87%{transform:translateX(2px);}
-  88%{transform:none;filter:none;}
-  92%{transform:translateX(1px);filter:brightness(1.5);}
-  93%{transform:none;filter:none;}
-}
-.hud-div { width:1px; height:36px; background:rgba(255,255,255,.07); flex-shrink:0; }
-
-#hud-center { display:flex; gap:30px; align-items:center; flex:1; justify-content:center; }
-.hud-stat { display:flex; flex-direction:column; align-items:center; gap:4px; min-width:80px; }
-.hstat-lbl { font-family:var(--mono); font-size:8px; letter-spacing:3px; }
-.hstat-num { font-family:var(--orb); font-size:22px; font-weight:700; line-height:1; }
-.hstat-bar { width:100%; height:2px; background:rgba(255,255,255,.05); }
-.hstat-fill { height:100%; width:0%; transition:width .7s cubic-bezier(.25,.46,.45,.94); }
-
-.h-sync .hstat-lbl,.h-sync .hstat-num { color:var(--green); }
-.h-sync .hstat-fill { background:var(--green); box-shadow:0 0 6px var(--green); }
-.h-integ .hstat-lbl,.h-integ .hstat-num { color:var(--green); }
-.h-integ .hstat-fill { background:var(--green); box-shadow:0 0 6px var(--green); }
-.h-noise .hstat-lbl,.h-noise .hstat-num { color:var(--green); }
-.h-noise .hstat-fill { background:var(--green); box-shadow:0 0 6px var(--green); }
-
-.noise-danger .h-noise .hstat-num { color:var(--red)!important; text-shadow:0 0 12px var(--red)!important; animation:numBlink .6s steps(1) infinite; }
-.noise-danger .h-noise .hstat-fill { background:var(--red)!important; box-shadow:0 0 8px var(--red)!important; animation:barBlink .6s steps(1) infinite; }
-@keyframes numBlink { 0%,49%{opacity:1;} 50%,100%{opacity:.2;} }
-@keyframes barBlink { 0%,49%{opacity:1;} 50%,100%{opacity:.25;} }
-
-@keyframes statPulse { 0%,100%{filter:brightness(1);} 40%{filter:brightness(3.5) drop-shadow(0 0 8px currentColor);} }
-.pulsing { animation:statPulse .55s ease; }
-
-#admin-box {
-  border:1px solid rgba(191,95,255,.35); padding:8px 16px;
-  font-family:var(--mono); font-size:11px; letter-spacing:2px;
-  white-space:nowrap; flex-shrink:0;
-  display:flex; align-items:center; gap:6px;
-}
-.adm-lbl { color:var(--txt-dim); }
-#adm-val { color:var(--txt-dim); }
-#adm-val.adm-on { color:var(--red); animation:admBlink .6s steps(1) infinite; }
-@keyframes admBlink { 0%,49%{opacity:1;} 50%,100%{opacity:.15;} }
-
-/* ── MAIN 2단 ── */
-#main {
-  height: calc(100vh - var(--hdr-h));
-  display:flex; overflow:hidden;
+html, body {
+  width: 100%; height: 100%;
+  background: var(--색_배경);
+  color: var(--색_텍스트);
+  font-family: var(--폰트_본문);
+  overflow: hidden;
 }
 
-/* ════ 좌측: 이미지 패널 ════ */
-#img-panel {
-  flex: 0 0 52%;
-  position:relative; overflow:hidden;
-  background:#000;
+/* 전체 스캔라인 */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background: repeating-linear-gradient(
+    0deg, transparent, transparent 2px,
+    rgba(0,0,0,0.12) 2px, rgba(0,0,0,0.12) 4px
+  );
+  pointer-events: none;
+  z-index: 9000;
 }
 
-#bg-a, #bg-b {
-  position:absolute; inset:0; z-index:0;
-  background-color:#000;
-  background-size:cover;
-  background-position:center center;
-  background-repeat:no-repeat;
-  transition:opacity 1.3s ease;
+/* ═══════════════════════════════════════════════
+   전체 레이아웃 — 헤더 고정 + 본문 스크롤
+═══════════════════════════════════════════════ */
+#헤더 {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: var(--헤더_높이);
+  background: rgba(2,5,8,0.96);
+  border-bottom: 1px solid var(--색_경계_밝음);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px;
+  z-index: 8000;
+  backdrop-filter: blur(8px);
 }
-#bg-b { opacity:0; }
 
-#scene-overlay {
-  position:absolute; inset:0; z-index:1; pointer-events:none;
-  transition:background 1.2s ease, opacity 1.2s ease;
+/* 왼쪽: 로고 */
+.로고_묶음 { display: flex; flex-direction: column; gap: 3px; }
+
+.로고_타이틀 {
+  font-family: var(--폰트_UI);
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: 4px;
+  color: var(--색_텍스트);
+  text-shadow: var(--글로우_시안);
+}
+.로고_타이틀 .강조 { color: var(--색_빨강); text-shadow: var(--글로우_빨강); }
+
+.로고_부제 {
+  font-family: var(--폰트_모노);
+  font-size: 8.5px;
+  color: var(--색_음소거);
+  letter-spacing: 2px;
 }
 
-#scanlines {
-  position:absolute; inset:0; z-index:2; pointer-events:none;
-  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.13) 2px,rgba(0,0,0,.13) 4px);
-  animation:scanFlow 10s linear infinite;
+/* 가운데: 수치 바 4개 */
+#수치_바_영역 {
+  display: flex;
+  gap: 10px;
+  align-items: center;
 }
-@keyframes scanFlow { from{background-position:0 0;} to{background-position:0 200px;} }
 
-#smog {
-  position:absolute; inset:0; z-index:3; pointer-events:none;
+.수치_블록 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 5px 14px;
+  border: 1px solid var(--색_경계);
+  background: rgba(4,13,20,0.8);
+  position: relative;
+  min-width: 80px;
+  transition: border-color 0.3s;
+}
+
+/* 상단 컬러 라인 */
+.수치_블록::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--수치색, var(--색_시안));
+  box-shadow: 0 0 5px var(--수치색, var(--색_시안));
+}
+
+.수치_라벨 {
+  font-family: var(--폰트_모노);
+  font-size: 8px;
+  color: var(--색_음소거);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.수치_값 {
+  font-family: var(--폰트_UI);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--수치색, var(--색_시안));
+  line-height: 1;
+  transition: color 0.3s;
+}
+
+.수치_게이지_트랙 {
+  width: 100%;
+  height: 2px;
+  background: rgba(255,255,255,0.07);
+  border-radius: 1px;
+}
+
+.수치_게이지_채움 {
+  height: 100%;
+  background: var(--수치색, var(--색_시안));
+  border-radius: 1px;
+  transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+  box-shadow: 0 0 4px var(--수치색, var(--색_시안));
+}
+
+.수치_블록.위험 { border-color: var(--수치색); }
+.수치_블록.위험 .수치_값 { animation: 위험_깜빡임 0.7s ease-in-out infinite; }
+.수치_블록.달성 { border-color: var(--색_녹색); }
+
+/* 오른쪽: 상태 + 어드민키 + 톱니바퀴 */
+.헤더_우측 {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.헤더_접속상태 {
+  font-family: var(--폰트_모노);
+  font-size: 10px;
+  color: var(--색_음소거);
+  text-align: right;
+  line-height: 1.7;
+}
+
+/* Admin Key 뱃지 */
+#어드민키_뱃지 {
+  display: none;
+  font-family: var(--폰트_모노);
+  font-size: 9px;
+  color: var(--색_녹색);
+  padding: 3px 8px;
+  border: 1px solid var(--색_녹색);
+  background: var(--색_녹색_dim);
+  letter-spacing: 1px;
+  white-space: nowrap;
+  animation: 깜빡임 1s step-end infinite;
+}
+
+/* ─── 톱니바퀴 버튼 ─── */
+#로그_톱니바퀴 {
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  background: transparent;
+  border: 1px solid var(--색_경계_밝음);
+  color: var(--색_음소거);
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+#로그_톱니바퀴:hover {
+  border-color: var(--색_시안);
+  color: var(--색_시안);
+  box-shadow: 0 0 10px rgba(0,229,255,0.15);
+}
+#로그_톱니바퀴.활성 {
+  border-color: var(--색_시안);
+  color: var(--색_시안);
+  background: rgba(0,229,255,0.06);
+}
+#로그_톱니바퀴 svg { width: 16px; height: 16px; }
+
+/* ─── 로그 드롭다운 패널 ─── */
+#로그_패널 {
+  display: none;
+  position: fixed;
+  top: var(--헤더_높이);
+  right: 0;
+  width: 420px;
+  max-height: 340px;
+  background: rgba(3,9,16,0.97);
+  border: 1px solid var(--색_경계_밝음);
+  border-top: none;
+  z-index: 7900;
+  flex-direction: column;
+  backdrop-filter: blur(12px);
+}
+#로그_패널.열림 { display: flex; }
+
+.로그_패널_헤더 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--색_경계);
+  font-family: var(--폰트_모노);
+  font-size: 10px;
+  color: var(--색_시안);
+  letter-spacing: 2px;
+  flex-shrink: 0;
+}
+
+.로그_클리어 {
+  font-family: var(--폰트_모노);
+  font-size: 9px;
+  color: var(--색_음소거);
+  background: transparent;
+  border: 1px solid var(--색_경계);
+  padding: 2px 8px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: all 0.15s;
+}
+.로그_클리어:hover { color: var(--색_빨강); border-color: var(--색_빨강); }
+
+#로그_내용 {
+  overflow-y: auto;
+  padding: 8px 14px;
+  flex: 1;
+}
+#로그_내용::-webkit-scrollbar { width: 3px; }
+#로그_내용::-webkit-scrollbar-thumb { background: var(--색_경계_밝음); }
+
+.로그_줄 {
+  font-family: var(--폰트_모노);
+  font-size: 11px;
+  color: #8bbfd4;
+  line-height: 1.65;
+}
+.로그_줄 .로그_시간 { color: #3a6a8a; margin-right: 6px; }
+.로그_줄 .로그_일반 { color: var(--색_시안); }
+.로그_줄 .로그_경고 { color: var(--색_앰버); }
+.로그_줄 .로그_에러 { color: var(--색_빨강); }
+.로그_줄 .로그_성공 { color: var(--색_녹색); }
+
+/* ═══════════════════════════════════════════════
+   메인 본문 — 헤더 아래부터 꽉 채움
+═══════════════════════════════════════════════ */
+#본문 {
+  margin-top: var(--헤더_높이);
+  height: calc(100vh - var(--헤더_높이));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ─── 조건 알림 바 ─── */
+#조건_알림_바 {
+  display: none;
+  padding: 5px 20px;
+  font-family: var(--폰트_모노);
+  font-size: 10px;
+  letter-spacing: 0.8px;
+  border-bottom: 1px solid var(--색_앰버_dim);
+  background: rgba(255,179,0,0.05);
+  color: var(--색_앰버);
+  line-height: 1.5;
+  flex-shrink: 0;
+}
+
+/* ─── 롤백 배너 ─── */
+#롤백_배너 {
+  display: none;
+  padding: 6px 20px;
+  font-family: var(--폰트_모노);
+  font-size: 11px;
+  color: var(--색_빨강);
+  border-bottom: 1px solid var(--색_빨강);
+  background: var(--색_빨강_dim);
+  letter-spacing: 1px;
+  animation: 글리치_흔들림 0.15s steps(2) infinite;
+  flex-shrink: 0;
+}
+
+/* ─── 씬 이미지 스테이지 (중앙 메인) ─── */
+#씬_스테이지 {
+  flex: 1;
+  position: relative;
+  background: #050c14;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 0;
+}
+
+#씬_스테이지 .씬_이미지_래퍼 {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+#씬_스테이지 .씬_이미지_래퍼 img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+  opacity: 0;
+  transition: opacity 0.7s ease;
+  filter: brightness(0.65) contrast(1.15);
+}
+#씬_스테이지 .씬_이미지_래퍼 img.로딩완료 { opacity: 1; }
+
+/* 스테이지 스캔라인 */
+#씬_스테이지::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(
+    0deg, transparent, transparent 3px,
+    rgba(0,0,0,0.12) 3px, rgba(0,0,0,0.12) 4px
+  );
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* 스테이지 하단 페이드 */
+#씬_스테이지::before {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 120px;
+  background: linear-gradient(to bottom, transparent, #050505);
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* 플레이스홀더 (이미지 없을 때) */
+.스테이지_플레이스홀더 {
+  position: absolute; inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
   background:
-    radial-gradient(ellipse at center,transparent 25%,rgba(8,11,15,.5) 100%),
-    linear-gradient(90deg,rgba(8,11,15,.08) 0%,transparent 20%,transparent 80%,rgba(8,11,15,.15) 100%);
+    repeating-linear-gradient(
+      45deg, transparent, transparent 22px,
+      rgba(0,229,255,0.015) 22px, rgba(0,229,255,0.015) 23px
+    ),
+    linear-gradient(180deg, #020c14 0%, #030f1e 100%);
+}
+.스테이지_플레이스홀더::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 60%, rgba(0,110,160,0.12) 0%, transparent 70%);
+}
+.플레이스홀더_씬ID_대 {
+  font-family: var(--폰트_UI);
+  font-size: clamp(48px, 7vw, 90px);
+  font-weight: 900;
+  color: rgba(0,229,255,0.06);
+  letter-spacing: 14px;
+  position: relative;
+}
+.플레이스홀더_배경명_대 {
+  font-family: var(--폰트_모노);
+  font-size: clamp(10px, 1.4vw, 14px);
+  color: rgba(0,229,255,0.18);
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  position: relative;
 }
 
-#glitch-layer {
-  position:absolute; inset:0; z-index:4; pointer-events:none;
-  opacity:0; transition:opacity .3s;
+/* 이미지 업로드 버튼 */
+.씬_이미지_업로드_버튼 {
+  position: absolute;
+  top: 12px; right: 12px;
+  z-index: 10;
+  display: flex; align-items: center; gap: 6px;
+  font-family: var(--폰트_모노);
+  font-size: 10px;
+  color: rgba(0,229,255,0.45);
+  background: rgba(2,5,8,0.78);
+  border: 1px solid rgba(0,229,255,0.18);
+  padding: 5px 11px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  opacity: 0;
+  transition: opacity 0.2s, color 0.2s, border-color 0.2s;
 }
-.noise-high #glitch-layer { opacity:1; animation:glitchFx .4s steps(3) infinite; }
-@keyframes glitchFx {
-  0%  {clip-path:inset(4% 0 88% 0); transform:translate(-5px,0); background:rgba(255,0,60,.08);}
-  25% {clip-path:inset(60% 0 6% 0); transform:translate(5px,0);  background:rgba(0,255,102,.05);}
-  50% {clip-path:inset(28% 0 50% 0);transform:translate(-3px,2px);background:rgba(52,152,219,.05);}
-  75% {clip-path:inset(76% 0 3% 0); transform:translate(3px,-2px);background:rgba(255,0,60,.09);}
-  100%{clip-path:inset(4% 0 88% 0); transform:translate(0,0);  background:transparent;}
-}
-
-#danger {
-  position:absolute; inset:0; z-index:5; pointer-events:none;
-  background:rgba(255,0,60,.07); opacity:0;
-}
-.noise-danger #danger { animation:dangerPulse 1.3s ease-in-out infinite; }
-@keyframes dangerPulse { 0%,100%{opacity:0;} 50%{opacity:1;} }
-
-.noise-danger #img-panel { animation:rgbSplit 3.5s ease-in-out infinite; }
-@keyframes rgbSplit {
-  0%,78%,100%{filter:none;}
-  79%{filter:drop-shadow(4px 0 var(--red)) drop-shadow(-4px 0 var(--cyan));}
-  80%{filter:none;}
-  85%{filter:drop-shadow(-3px 0 var(--red)) drop-shadow(3px 0 var(--cyan)) brightness(1.07);}
-  86%{filter:none;}
+#씬_스테이지:hover .씬_이미지_업로드_버튼 { opacity: 1; }
+.씬_이미지_업로드_버튼:hover { color: var(--색_시안); border-color: var(--색_시안); }
+.씬_이미지_업로드_버튼 input[type=file] {
+  position: absolute; inset: 0;
+  opacity: 0; cursor: pointer; width: 100%; height: 100%;
 }
 
-.bc {
-  position:absolute; z-index:6; pointer-events:none;
-  font-family:var(--mono); font-size:5px;
-  color:rgba(0,255,102,.07); line-height:1.4; white-space:pre;
-}
-#bc-tl {top:10px;left:10px;}
-#bc-bl {bottom:10px;left:10px;}
-
-#timer-ring {
-  position:absolute; bottom:18px; right:18px; z-index:7;
-  width:52px; height:52px;
-  display:flex; align-items:center; justify-content:center;
-}
-#timer-ring svg {
-  position:absolute; top:0; left:0; width:100%; height:100%;
-  transform:rotate(-90deg);
-}
-#timer-num {
-  font-family:var(--mono); font-size:15px; font-weight:bold;
-  color:var(--red); text-shadow:0 0 12px var(--red);
-  position:relative; z-index:1;
-}
-.timer-warn #timer-ring { animation:ringBlink .45s steps(1) infinite; }
-@keyframes ringBlink { 0%,49%{opacity:1;} 50%,100%{opacity:.2;} }
-
-/* ════ 우측: 정보 패널 ════ */
-#info-panel {
-  flex:1; background:var(--panel);
-  border-left:1px solid rgba(255,255,255,.055);
-  display:flex; flex-direction:column;
-  padding:24px 26px 18px; gap:0;
-  overflow:hidden; position:relative; z-index:10;
+/* ─── 하단 대시보드 (3단 그리드) ─── */
+#씬_대시보드 {
+  height: 290px;
+  flex-shrink: 0;
+  background: #050505;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  display: grid;
+  grid-template-columns: 1fr 2.2fr 1.6fr;
+  gap: 0;
+  position: relative;
+  z-index: 5;
 }
 
-#scene-title {
-  font-family:var(--mono); font-size:clamp(17px,2vw,24px);
-  font-weight:bold; color:var(--amber);
-  letter-spacing:1px; line-height:1.25;
-  padding-bottom:10px;
-  border-bottom:1px solid rgba(243,156,18,.28);
-  margin-bottom:9px; flex-shrink:0;
-  animation:neonFlicker 11s ease-in-out infinite;
-}
-@keyframes neonFlicker {
-  0%,70%,72%,75%,100%{opacity:1;text-shadow:0 0 8px rgba(243,156,18,.4);}
-  71%{opacity:.55;text-shadow:none;}
-  73%,74%{opacity:.38;}
+/* 컬럼 공통 */
+.대시_컬럼 {
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  overflow: hidden;
 }
 
-#scene-tag {
-  font-family:var(--mono); font-size:11px;
-  color:rgba(255,255,255,.3); letter-spacing:3px;
-  margin-bottom:11px; flex-shrink:0; text-transform:uppercase;
+.대시_컬럼:not(:last-child) {
+  border-right: 1px solid rgba(255,255,255,0.1);
 }
 
-#ui-narr {
-  font-size:14px; color:var(--txt-dim);
-  line-height:1.7; font-style:italic; letter-spacing:.3px;
-  margin-bottom:13px; flex-shrink:0;
-  display:-webkit-box; -webkit-line-clamp:2;
-  -webkit-box-orient:vertical; overflow:hidden;
+/* 컬럼1: 씬 정보 */
+#대시_씬정보 {
+  justify-content: flex-start;
 }
 
-#dialog-block {
-  flex:1; display:flex; flex-direction:column;
-  min-height:0; border-left:3px solid var(--purple);
-  padding:2px 0 2px 15px; margin-bottom:14px;
-  overflow:hidden; cursor:pointer; position:relative;
+.대시_페이즈 {
+  font-family: var(--폰트_모노);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--색_빨강);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
 }
-#char-name {
-  font-family:var(--mono); font-size:15px; font-weight:bold;
-  margin-bottom:8px; flex-shrink:0; letter-spacing:1px;
-}
-.cn-normal { color:var(--green); }
-.cn-red    { color:var(--red); }
-.cn-purple { color:var(--purple); }
-.cn-dim    { color:var(--txt-dim); font-size:12px; letter-spacing:3px; }
 
-.dialog-scroll {
-  flex:1; overflow-y:auto;
-  scrollbar-width:thin; scrollbar-color:rgba(191,95,255,.2) transparent;
+.대시_씬ID {
+  font-family: var(--폰트_UI);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--색_배경);
+  background: var(--색_시안);
+  padding: 3px 10px;
+  letter-spacing: 2px;
+  display: inline-block;
+  align-self: flex-start;
 }
-.dialog-scroll::-webkit-scrollbar { width:3px; }
-.dialog-scroll::-webkit-scrollbar-thumb { background:rgba(191,95,255,.2); }
 
-/* =========================================
-   대사 & 강조 스타일 상향 조정
-========================================= */
-#dialog-text {
-  font-size:18px; line-height:1.75; color:#E0E0E0;
-  font-weight:400; letter-spacing:.4px; white-space:pre-wrap; word-break:keep-all;
+.대시_씬제목 {
+  font-family: var(--폰트_본문);
+  font-size: 22px;
+  font-weight: 700;
+  color: #eeeeee;
+  line-height: 1.2;
 }
-.hl-green  { color: var(--green); font-weight: 700; text-shadow: 0 0 5px rgba(0,255,102,0.4); }
-.hl-red    { color: var(--red); font-weight: 700; text-shadow: 0 0 5px rgba(255,0,60,0.4); }
-.hl-amber  { color: var(--amber); font-weight: 700; text-shadow: 0 0 5px rgba(243,156,18,0.4); }
-.hl-cyan   { color: var(--cyan); font-weight: 700; text-shadow: 0 0 5px rgba(52,152,219,0.4); }
-.hl-purple { color: var(--purple); font-weight: 700; text-shadow: 0 0 5px rgba(191,95,255,0.4); }
 
-#cursor {
-  display:inline-block; width:8px; height:18px;
-  background:var(--green); animation:cursorBlink .65s steps(1) infinite;
-  vertical-align:middle; margin-left:3px;
+.대시_위치태그 {
+  font-family: var(--폰트_모노);
+  font-size: 11px;
+  color: var(--색_음소거);
+  letter-spacing: 1px;
 }
-@keyframes cursorBlink { 0%,49%{opacity:1;} 50%,100%{opacity:0;} }
 
-/* 안내 텍스트 가시성 향상 */
-#skip-hint { font-family:var(--mono); font-size:11px; color:var(--txt-dim); margin-top:8px; flex-shrink:0; }
-#cont-hint { 
-  display:none; font-family:var(--body); font-size:14px; font-weight:bold; color:var(--green); 
-  margin-top:10px; flex-shrink:0; animation:hintBounce .9s ease-in-out infinite; 
-  text-shadow: 0 0 8px rgba(0,255,102,0.4); letter-spacing: 1px;
+.대시_판정 {
+  display: none !important;
 }
-@keyframes hintBounce { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-3px);} }
 
-.hr { height:1px; background:rgba(255,255,255,.06); margin-bottom:12px; flex-shrink:0; }
-
-.ctrl-row { display:flex; gap:8px; margin-bottom:10px; flex-shrink:0; }
-.ctrl-btn {
-  font-family:var(--mono); font-size:10px; letter-spacing:2px;
-  padding:8px 10px; background:transparent;
-  color:var(--txt-dim); border:1px solid rgba(255,255,255,.09);
-  cursor:pointer; transition:all .2s; flex:1; text-transform:uppercase;
+/* 컬럼2: 대사 */
+#대시_대사 {
+  position: relative;
 }
-.ctrl-btn:hover { color:var(--green); border-color:rgba(0,255,102,.3); background:rgba(0,255,102,.04); }
-.ctrl-btn:disabled { opacity:.18; cursor:not-allowed; pointer-events:none; }
-#btn-skip { color:var(--green); border-color:rgba(0,255,102,.2); }
 
-#choices-wrap {
-  display:grid; grid-template-columns:1fr 1fr; gap:10px; flex-shrink:0;
+.대시_배경묘사 {
+  font-family: var(--폰트_모노);
+  font-size: 11px;
+  font-weight: 600;
+  color: #90c4d8;
+  line-height: 1.6;
+  padding: 6px 12px;
+  border-left: 2px solid var(--색_경계_밝음);
+  background: rgba(0,229,255,0.02);
+  flex-shrink: 0;
+  white-space: pre-line;
 }
-#choices-wrap.single { grid-template-columns:1fr; }
 
-.choice-card {
-  background:rgba(10,13,18,.92);
-  border:1px solid rgba(255,255,255,.09); border-radius:6px;
-  padding:14px 14px 12px;
-  cursor:pointer; transition:all .22s;
-  display:flex; flex-direction:column; align-items:center; gap:7px;
-  text-align:center; position:relative; overflow:hidden;
+/* 배경묘사 안의 시스템 로그성 span 숨김 */
+.대시_배경묘사 .강조_녹색,
+.대시_배경묘사 .강조_앰버,
+.대시_배경묘사 .강조_빨강 {
+  display: none;
 }
-.choice-card::before {
-  content:''; position:absolute; inset:0; opacity:0; transition:opacity .25s;
-}
-.choice-card:hover::before { opacity:1; }
-.choice-card:active { transform:scale(.985); }
 
-.type-warm   { border-color:rgba(243,156,18,.28); }
-.type-warm::before   { background:radial-gradient(ellipse at center,rgba(243,156,18,.08),transparent 70%); }
-.type-warm:hover     { border-color:rgba(243,156,18,.6); box-shadow:0 0 18px rgba(243,156,18,.15); }
-.type-cold   { border-color:rgba(52,152,219,.28); }
-.type-cold::before   { background:radial-gradient(ellipse at center,rgba(52,152,219,.08),transparent 70%); }
-.type-cold:hover     { border-color:rgba(52,152,219,.6); box-shadow:0 0 18px rgba(52,152,219,.15); }
-.type-dark   { border-color:rgba(255,0,60,.28); }
-.type-dark::before   { background:radial-gradient(ellipse at center,rgba(255,0,60,.08),transparent 70%); }
-.type-dark:hover     { border-color:rgba(255,0,60,.6); box-shadow:0 0 18px rgba(255,0,60,.15); }
-.type-neutral{ border-color:rgba(0,255,102,.22); }
-.type-neutral::before{ background:radial-gradient(ellipse at center,rgba(0,255,102,.07),transparent 70%); }
-.type-neutral:hover  { border-color:rgba(0,255,102,.6); box-shadow:0 0 18px rgba(0,255,102,.12); }
-
-.c-badge {
-  width:24px; height:24px; border-radius:50%;
-  font-family:var(--mono); font-size:11px; font-weight:bold;
-  display:flex; align-items:center; justify-content:center;
+.대시_대사_컨테이너 {
+  flex: 1;
+  overflow-y: auto;
+  border-left: 3px solid var(--색_시안);
+  padding-left: 14px;
+  min-height: 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--색_시안) transparent;
 }
-.type-warm   .c-badge { background:var(--amber);  color:#000; }
-.type-cold   .c-badge { background:var(--cyan);   color:#000; }
-.type-dark   .c-badge { background:var(--red);    color:#fff; }
-.type-neutral.c-badge,
-.type-neutral .c-badge{ background:var(--green);  color:#000; }
+.대시_대사_컨테이너::-webkit-scrollbar { width: 3px; }
+.대시_대사_컨테이너::-webkit-scrollbar-thumb { background: var(--색_시안); }
 
-.c-title { font-size:14px; font-weight:700; line-height:1.35; color:#fff; letter-spacing:.2px; }
-.c-effects { display:flex; gap:4px; flex-wrap:wrap; justify-content:center; }
-.eff-pill {
-  font-family:var(--mono); font-size:9px; padding:2px 6px;
-  border-radius:10px; border:1px solid; letter-spacing:1px;
+.대시_대사_블록 { margin-bottom: 10px; }
+.대시_화자명 {
+  font-family: var(--폰트_UI);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  margin-bottom: 3px;
 }
-.ep-warm { color:var(--amber); border-color:rgba(243,156,18,.4); background:rgba(243,156,18,.08); }
-.ep-cold { color:var(--cyan);  border-color:rgba(52,152,219,.4); background:rgba(52,152,219,.08); }
-.ep-dark { color:var(--red);   border-color:rgba(255,0,60,.4);   background:rgba(255,0,60,.08);   }
-.ep-heal { color:var(--green); border-color:rgba(0,255,102,.4);  background:rgba(0,255,102,.08);  }
-.ep-flag { color:var(--purple);border-color:rgba(191,95,255,.4); background:rgba(191,95,255,.08); }
+.대시_대사_텍스트 {
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.75;
+  color: var(--색_텍스트);
+}
+.대시_대사_텍스트.지문_텍스트 {
+  color: var(--색_음소거);
+  font-style: italic;
+  font-size: 13.5px;
+}
 
-.choice-card.disabled { opacity:.16; cursor:not-allowed; pointer-events:none; }
+/* 컬럼3: 선택지 */
+#대시_선택지 {
+  justify-content: flex-start;
+  gap: 8px;
+}
 
-#trans { position:fixed; inset:0; z-index:500; background:var(--bg); opacity:0; pointer-events:none; }
-.transitioning #trans { animation:transAnim .85s ease forwards; }
-@keyframes transAnim { 0%{opacity:0;} 25%{opacity:1;} 75%{opacity:1;} 100%{opacity:0;} }
-@keyframes shake {
-  0%{transform:translate(0,0);} 15%{transform:translate(-3px,1px);} 30%{transform:translate(3px,-2px);}
-  50%{transform:translate(-2px,2px);} 70%{transform:translate(2px,-1px);} 85%{transform:translate(-1px,1px);}
-  100%{transform:translate(0,0);}
+#대시_선택지_목록 {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  min-height: 0;
 }
-.shaking { animation:shake .35s ease !important; }
 
-#title-screen {
-  position:fixed; inset:0; z-index:900; background:var(--bg);
-  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px;
+.대시_선택지_타이틀 {
+  font-family: var(--폰트_모노);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--색_음소거);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  flex-shrink: 0;
 }
-.t-logo {
-  font-family:var(--orb); font-weight:900; font-size:clamp(30px,5.5vw,56px);
-  letter-spacing:10px; color:var(--green);
-  text-shadow:0 0 28px var(--green),0 0 70px rgba(0,255,102,.2);
-  text-align:center; line-height:1.05; animation:tGlow 3s ease-in-out infinite;
-}
-@keyframes tGlow {
-  0%,100%{text-shadow:0 0 28px var(--green),0 0 60px rgba(0,255,102,.18);}
-  50%{text-shadow:0 0 44px var(--green),0 0 110px rgba(0,255,102,.35);}
-}
-.t-sub  { font-family:var(--mono); font-size:10px; color:rgba(0,255,102,.3); letter-spacing:5px; text-align:center; }
-.t-year { font-family:var(--mono); font-size:12px; color:rgba(255,255,255,.07); letter-spacing:12px; }
-#boot-log { font-family:var(--mono); font-size:9px; color:rgba(0,255,102,.42); letter-spacing:1px; margin-top:16px; width:320px; max-width:92vw; height:68px; overflow:hidden; line-height:2; }
-#start-btn {
-  margin-top:16px; font-family:var(--mono); font-size:11px; letter-spacing:4px;
-  padding:13px 38px; background:transparent; border:1px solid var(--green);
-  color:var(--green); cursor:pointer; transition:all .25s; text-transform:uppercase;
-  animation:btnPulse 2.2s ease-in-out infinite;
-}
-@keyframes btnPulse { 0%,100%{box-shadow:0 0 8px rgba(0,255,102,.2);} 50%{box-shadow:0 0 28px rgba(0,255,102,.5);} }
-#start-btn:hover { background:rgba(0,255,102,.08); box-shadow:0 0 44px rgba(0,255,102,.5); }
-.t-ver { position:fixed; bottom:12px; font-family:var(--mono); font-size:7px; color:rgba(0,255,102,.1); letter-spacing:3px; }
 
-#ending { position:fixed; inset:0; z-index:800; background:var(--bg); display:none; flex-direction:column; align-items:center; justify-content:center; gap:14px; padding:40px; }
-#ending.active { display:flex; }
-.end-label   { font-family:var(--mono); font-size:9px; letter-spacing:5px; color:var(--txt-dim); text-transform:uppercase; }
-.end-title   { font-family:var(--orb); font-size:clamp(22px,4vw,38px); font-weight:900; letter-spacing:6px; text-align:center; margin-top:4px; }
-.end-summary { font-family:var(--body); font-size:13px; line-height:2; color:var(--txt-dim); text-align:center; max-width:540px; font-weight:300; white-space:pre-wrap; margin-top:10px; }
-.end-stats   { font-family:var(--mono); font-size:9px; color:rgba(255,255,255,.1); margin-top:16px; line-height:2; text-align:center; border-top:1px solid rgba(255,255,255,.05); padding-top:14px; }
-#restart-btn { margin-top:20px; font-family:var(--mono); font-size:10px; letter-spacing:3px; padding:12px 32px; background:transparent; border:1px solid var(--green); color:var(--green); cursor:pointer; transition:all .22s; }
-#restart-btn:hover { background:rgba(0,255,102,.08); box-shadow:0 0 22px rgba(0,255,102,.32); }
+.대시_선택_버튼 {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--선택_색, var(--색_시안));
+  color: var(--색_텍스트);
+  font-family: var(--폰트_본문);
+  font-size: 15px;
+  font-weight: 700;
+  padding: 0 14px;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  position: relative;
+  transition: transform 0.15s, box-shadow 0.15s;
+  flex: 1;
+  min-height: 0;
+}
+.대시_선택_버튼::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: var(--선택_색, var(--색_시안));
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.대시_선택_버튼:hover { transform: scale(1.01); box-shadow: 0 0 14px rgba(0,229,255,0.1); }
+.대시_선택_버튼:hover::before { opacity: 0.05; }
+.대시_선택_버튼:hover .대시_선택_레이블 { background: var(--선택_색); color: var(--색_배경); }
+.대시_선택_버튼:disabled { opacity: 0.3; cursor: not-allowed; pointer-events: none; }
+.대시_선택_버튼.잠금 { border-color: var(--색_경계); --선택_색: var(--색_경계); cursor: not-allowed; }
 
-@media (max-height:700px) {
-  :root{--hdr-h:52px;} .hstat-num{font-size:18px;} #scene-title{font-size:15px;} 
-  #dialog-text{font-size:15px;line-height:1.7;} #cont-hint{font-size:12px;}
+.대시_선택_레이블 {
+  font-family: var(--폰트_UI);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border: 1px solid var(--선택_색, var(--색_시안));
+  color: var(--선택_색, var(--색_시안));
+  letter-spacing: 1px;
+  transition: all 0.15s;
+  white-space: nowrap;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.대시_선택_내용 { display: flex; flex-direction: column; gap: 0; position: relative; }
+.대시_선택_본문 { font-size: 15px; font-weight: 700; line-height: 1.3; }
+.대시_선택_효과 { display: none; }
+
+/* ─── 레거시 씬_패널 숨김 ─── */
+#씬_패널 { display: none; }
+
+/* 화자 색상 (대시보드 버전) */
+.대시_화자명.화자_시스템 { color: var(--색_빨강); }
+.대시_화자명.화자_오빠   { color: var(--색_시안); }
+.대시_화자명.화자_아버지 { color: var(--색_앰버); }
+.대시_화자명.화자_어머니 { color: #ff8fab; }
+.대시_화자명.화자_누이   { color: var(--색_녹색); }
+.대시_화자명.화자_로그   { color: var(--색_음소거); }
+.대시_화자명.화자_지문   { color: #90c4d8; font-style: italic; }
+
+/* 인라인 강조 */
+.강조_녹색 { color: var(--색_녹색); font-weight: 700; }
+.강조_빨강 { color: var(--색_빨강); font-weight: 700; }
+.강조_앰버 { color: var(--색_앰버); font-weight: 700; }
+
+/* 색상 클래스 (선택지 버튼용) */
+.색_시안  { --선택_색: var(--색_시안); }
+.색_빨강  { --선택_색: var(--색_빨강); }
+.색_앰버  { --선택_색: var(--색_앰버); }
+.색_녹색  { --선택_색: var(--색_녹색); }
+.색_보라  { --선택_색: var(--색_보라); }
+═══════════════════════════════════════════════ */
+#엔딩_화면 {
+  display: none;
+  position: fixed; inset: 0;
+  background: var(--색_배경);
+  z-index: 6000;
+  overflow-y: auto;
+}
+#엔딩_화면.보임 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+.엔딩_내부 {
+  max-width: 700px;
+  width: 100%;
+  margin: 0 auto;
+  text-align: center;
+  padding: 40px 32px;
+}
+
+.엔딩_분류 {
+  font-family: var(--폰트_모노);
+  font-size: 11px;
+  letter-spacing: 4px;
+  color: #8bbfd4;
+  margin-bottom: 14px;
+}
+.엔딩_제목 {
+  font-family: var(--폰트_UI);
+  font-size: clamp(28px, 5vw, 44px);
+  font-weight: 900;
+  letter-spacing: 5px;
+  margin-bottom: 8px;
+}
+.엔딩_제목.혁명가 { color: var(--색_빨강); text-shadow: var(--글로우_빨강); }
+.엔딩_제목.생존자  { color: var(--색_앰버); text-shadow: 0 0 24px #ffb30040; }
+.엔딩_제목.소거됨  { color: #4a6a7a; }
+
+.엔딩_부제 {
+  font-family: var(--폰트_모노);
+  font-size: 11px;
+  letter-spacing: 3px;
+  margin-bottom: 28px;
+  opacity: 0.7;
+}
+.엔딩_구분선 {
+  width: 60px; height: 1px;
+  margin: 0 auto 28px;
+  opacity: 0.4;
+}
+.엔딩_본문 {
+  font-size: 15px;
+  line-height: 2;
+  color: #90c4d8;
+  margin-bottom: 40px;
+}
+.엔딩_수치_요약 {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+  margin-bottom: 16px;
+  padding: 18px 28px;
+  border: 1px solid var(--색_경계);
+  background: var(--색_패널);
+}
+.요약_항목 { text-align: center; }
+.요약_라벨 {
+  font-family: var(--폰트_모노);
+  font-size: 9px;
+  color: #8bbfd4;
+  letter-spacing: 1px;
+  display: block;
+  margin-bottom: 4px;
+}
+.요약_값 {
+  font-family: var(--폰트_UI);
+  font-size: 22px;
+  font-weight: 700;
+}
+.엔딩_판정_설명 {
+  font-family: var(--폰트_모노);
+  font-size: 11px;
+  color: var(--색_음소거);
+  letter-spacing: 1px;
+  margin-bottom: 36px;
+}
+.FIN_태그 {
+  font-family: var(--폰트_모노);
+  font-size: 11px;
+  color: var(--색_음소거);
+  letter-spacing: 4px;
+  margin-bottom: 28px;
+}
+.재시작_버튼 {
+  font-family: var(--폰트_UI);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: var(--색_배경);
+  background: var(--색_시안);
+  border: none;
+  padding: 13px 38px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.재시작_버튼:hover { background: var(--색_텍스트); box-shadow: 0 0 28px var(--색_시안); }
+
+/* ═══════════════════════════════════════════════
+   애니메이션
+═══════════════════════════════════════════════ */
+@keyframes 깜빡임 { 0%,100%{opacity:1}50%{opacity:0} }
+@keyframes 페이드업 { to{opacity:1;transform:translateY(0)} }
+@keyframes 씬_등장 { from{transform:scaleY(0.97);opacity:0}to{transform:scaleY(1);opacity:1} }
+@keyframes 위험_깜빡임 { 0%,100%{opacity:1}50%{opacity:0.45} }
+@keyframes 글리치_흔들림 {
+  0%{transform:translate(-2px,0)}25%{transform:translate(2px,0)}
+  50%{transform:translate(-1px,0)}75%{transform:translate(1px,0)}100%{transform:translate(0)}
+}
+@keyframes 톱니_회전 { to { transform: rotate(360deg); } }
+
+#로그_톱니바퀴.활성 svg { animation: 톱니_회전 2.5s linear infinite; }
+
+/* ═══════════════════════════════════════════════
+   [NEW] 스모그 레이어
+═══════════════════════════════════════════════ */
+#스모그_레이어 {
+  position: fixed; inset: 0;
+  pointer-events: none;
+  z-index: 8500;
+  overflow: hidden;
+}
+.스모그_클라우드 {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  animation: 스모그_유동 linear infinite;
+  opacity: 0;
+}
+@keyframes 스모그_유동 {
+  0%   { transform: translate(0, 0) scale(1);   opacity: 0; }
+  15%  { opacity: var(--스모그_최대_불투명, 0.06); }
+  85%  { opacity: var(--스모그_최대_불투명, 0.06); }
+  100% { transform: translate(var(--스모그_dx, 60px), var(--스모그_dy, -40px)) scale(1.3); opacity: 0; }
+}
+
+/* ═══════════════════════════════════════════════
+   [NEW] RGB 글리치 오버레이
+═══════════════════════════════════════════════ */
+#글리치_오버레이 {
+  position: fixed; inset: 0;
+  pointer-events: none;
+  z-index: 8700;
+}
+.글리치_슬라이스 {
+  position: absolute;
+  left: 0; right: 0;
+  height: var(--슬라이스_높이, 3px);
+  background: var(--슬라이스_색, rgba(0,229,255,0.15));
+  transform: translateX(var(--슬라이스_오프셋, 0px));
+  mix-blend-mode: screen;
+  opacity: 0;
+  animation: 글리치_슬라이스_동작 linear infinite;
+  animation-duration: var(--슬라이스_주기, 4s);
+  animation-delay: var(--슬라이스_딜레이, 0s);
+}
+@keyframes 글리치_슬라이스_동작 {
+  0%,89%,100% { opacity:0; transform: translateX(0); }
+  90% { opacity:1; transform: translateX(var(--슬라이스_오프셋, -8px)); }
+  91% { opacity:0; }
+  92% { opacity:1; transform: translateX(calc(var(--슬라이스_오프셋, -8px) * -0.5)); }
+  93%,100% { opacity:0; }
+}
+
+/* ═══════════════════════════════════════════════
+   [NEW] 실시간 노이즈 오버레이
+═══════════════════════════════════════════════ */
+#노이즈_캔버스 {
+  position: fixed; inset: 0;
+  pointer-events: none;
+  z-index: 8600;
+  opacity: 0.045;
+  mix-blend-mode: screen;
+}
+
+/* ═══════════════════════════════════════════════
+   [NEW] 파티클 캔버스
+═══════════════════════════════════════════════ */
+#파티클_캔버스 {
+  position: fixed; inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.7;
+}
+
+/* ═══════════════════════════════════════════════
+   [NEW] 선택지 홀로그램 hover 효과
+═══════════════════════════════════════════════ */
+.대시_선택_버튼 {
+  overflow: hidden;
+}
+.대시_선택_버튼::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(0,229,255,0.03) 3px,
+    rgba(0,229,255,0.03) 4px
+  );
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+}
+.대시_선택_버튼:hover::after { opacity: 1; }
+
+/* 홀로그램 스캔 라인 효과 */
+.대시_선택_버튼 .홀로_스캔 {
+  position: absolute;
+  left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--선택_색, var(--색_시안)), transparent);
+  top: -2px;
+  opacity: 0;
+  filter: blur(1px);
+  transition: none;
+  pointer-events: none;
+}
+.대시_선택_버튼:hover .홀로_스캔 {
+  animation: 홀로_스캔_이동 0.8s ease-in-out infinite;
+  opacity: 0.8;
+}
+@keyframes 홀로_스캔_이동 {
+  0%   { top: -2px; opacity: 0; }
+  10%  { opacity: 0.8; }
+  90%  { opacity: 0.8; }
+  100% { top: calc(100% + 2px); opacity: 0; }
+}
+
+/* 홀로그램 코너 마커 */
+.대시_선택_버튼 .홀로_코너 {
+  position: absolute;
+  width: 8px; height: 8px;
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+}
+.대시_선택_버튼:hover .홀로_코너 { opacity: 1; }
+.홀로_코너.좌상 { top: 3px; left: 3px; border-top: 1px solid var(--선택_색, var(--색_시안)); border-left: 1px solid var(--선택_색, var(--색_시안)); }
+.홀로_코너.우상 { top: 3px; right: 3px; border-top: 1px solid var(--선택_색, var(--색_시안)); border-right: 1px solid var(--선택_색, var(--색_시안)); }
+.홀로_코너.좌하 { bottom: 3px; left: 3px; border-bottom: 1px solid var(--선택_색, var(--색_시안)); border-left: 1px solid var(--선택_색, var(--색_시안)); }
+.홀로_코너.우하 { bottom: 3px; right: 3px; border-bottom: 1px solid var(--선택_색, var(--색_시안)); border-right: 1px solid var(--선택_색, var(--색_시안)); }
+
+/* 홀로그램 glitch flicker */
+@keyframes 홀로_글리치 {
+  0%,96%,100% { clip-path: none; transform: none; }
+  97% { clip-path: inset(20% 0 60% 0); transform: translateX(-3px); }
+  98% { clip-path: inset(60% 0 10% 0); transform: translateX(3px); }
+  99% { clip-path: none; transform: translateX(-1px); }
+}
+.대시_선택_버튼:hover {
+  animation: 홀로_글리치 3s step-end infinite;
+}
+
+/* ═══════════════════════════════════════════════
+   [NEW] 타이핑 애니메이션
+═══════════════════════════════════════════════ */
+.타이핑_텍스트 {
+  overflow: hidden;
+  white-space: nowrap;
+  border-right: 2px solid var(--색_시안);
+  animation: 타이핑_커서 0.75s step-end infinite;
+}
+@keyframes 타이핑_커서 {
+  0%,100% { border-color: var(--색_시안); }
+  50%     { border-color: transparent; }
+}
+.타이핑_완료 {
+  border-right: none;
+  animation: none;
+  white-space: normal;
+  overflow: visible;
+}
+
+/* ═══════════════════════════════════════════════
+   [NEW] 시작 화면
+═══════════════════════════════════════════════ */
+#시작_화면 {
+  position: fixed; inset: 0;
+  background: #020508;
+  z-index: 9500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  overflow: hidden;
+  transition: opacity 1.2s ease;
+}
+#시작_화면.페이드아웃 {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* 시작화면 배경 그리드 */
+#시작_화면::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    linear-gradient(rgba(0,229,255,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,229,255,0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+  animation: 그리드_이동 12s linear infinite;
+}
+@keyframes 그리드_이동 {
+  from { background-position: 0 0; }
+  to   { background-position: 48px 48px; }
+}
+
+/* 중앙 글로우 */
+#시작_화면::after {
+  content: '';
+  position: absolute;
+  width: 800px; height: 500px;
+  left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(ellipse, rgba(0,80,120,0.25) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.시작_컨텐츠 {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+/* 학번 / 이름 */
+.시작_메타 {
+  font-family: var(--폰트_모노);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--색_텍스트);
+  letter-spacing: 5px;
+  margin-bottom: 32px;
+  opacity: 0;
+  animation: 페이드업 0.6s ease 0.3s forwards;
+}
+
+/* 메인 타이틀 — FOX SISTER */
+.시작_타이틀_상단 {
+  font-family: var(--폰트_UI);
+  font-size: clamp(42px, 7vw, 88px);
+  font-weight: 900;
+  letter-spacing: 18px;
+  color: var(--색_텍스트);
+  text-shadow: 0 0 40px rgba(0,229,255,0.25), 0 0 80px rgba(0,229,255,0.1);
+  line-height: 1;
+  opacity: 0;
+  animation: 시작_등장 0.9s cubic-bezier(0.16,1,0.3,1) 0.7s forwards;
+  position: relative;
+}
+.시작_타이틀_상단 .시작_강조 {
+  color: var(--색_빨강);
+  text-shadow: var(--글로우_빨강), 0 0 60px rgba(255,45,74,0.2);
+}
+/* RGB 글리치 on title */
+.시작_타이틀_상단::before,
+.시작_타이틀_상단::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  opacity: 0;
+}
+.시작_타이틀_상단::before {
+  color: var(--색_빨강);
+  animation: 시작_글리치_레드 6s step-end infinite 2s;
+  clip-path: inset(30% 0 50% 0);
+}
+.시작_타이틀_상단::after {
+  color: var(--색_시안);
+  animation: 시작_글리치_시안 6s step-end infinite 2.15s;
+  clip-path: inset(60% 0 20% 0);
+}
+@keyframes 시작_글리치_레드 {
+  0%,93%,100% { opacity:0; transform:none; }
+  94% { opacity:0.6; transform:translateX(-4px); }
+  96% { opacity:0; }
+  97% { opacity:0.4; transform:translateX(3px); }
+  98%,99% { opacity:0; }
+}
+@keyframes 시작_글리치_시안 {
+  0%,93%,100% { opacity:0; transform:none; }
+  94% { opacity:0.5; transform:translateX(4px); }
+  96% { opacity:0; }
+  97% { opacity:0.35; transform:translateX(-2px); }
+  98%,99% { opacity:0; }
+}
+
+@keyframes 시작_등장 {
+  from { opacity:0; transform: translateY(20px) skewX(-2deg); }
+  to   { opacity:1; transform: translateY(0)    skewX(0deg); }
+}
+
+/* 부제 — gene containment */
+.시작_타이틀_하단 {
+  font-family: var(--폰트_모노);
+  font-size: clamp(11px, 1.6vw, 16px);
+  letter-spacing: 10px;
+  color: var(--색_음소거);
+  margin-top: 12px;
+  opacity: 0;
+  animation: 페이드업 0.7s ease 1.3s forwards;
+}
+
+/* 구분선 */
+.시작_구분선 {
+  width: 180px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--색_시안), transparent);
+  margin: 32px auto;
+  opacity: 0;
+  animation: 페이드업 0.6s ease 1.6s forwards;
+}
+
+/* [시스템 접속] 문구 */
+.시작_접속문구 {
+  font-family: var(--폰트_모노);
+  font-size: clamp(13px, 2vw, 17px);
+  color: var(--색_시안);
+  letter-spacing: 8px;
+  opacity: 0;
+  animation: 페이드업 0.6s ease 1.9s forwards;
+  text-shadow: var(--글로우_시안);
+}
+.시작_접속문구 .접속_브라켓 { color: rgba(0,229,255,0.4); }
+
+/* 시작 버튼 */
+.시작_버튼_영역 {
+  margin-top: 52px;
+  opacity: 0;
+  animation: 페이드업 0.7s ease 2.5s forwards;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.시작_버튼 {
+  font-family: var(--폰트_UI);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 5px;
+  color: var(--색_배경);
+  background: var(--색_시안);
+  border: none;
+  padding: 15px 52px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.25s;
+  clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+}
+.시작_버튼::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent 30%, rgba(255,255,255,0.3) 50%, transparent 70%);
+  transform: translateX(-100%);
+  transition: transform 0.5s ease;
+}
+.시작_버튼:hover { box-shadow: 0 0 30px rgba(0,229,255,0.5), 0 0 60px rgba(0,229,255,0.15); }
+.시작_버튼:hover::before { transform: translateX(100%); }
+
+.시작_버튼_힌트 {
+  font-family: var(--폰트_모노);
+  font-size: 9px;
+  color: rgba(139,191,212,0.4);
+  letter-spacing: 2px;
+  animation: 깜빡임 2s step-end infinite;
+}
+
+/* 하단 코너 데코 */
+.시작_코너 {
+  position: absolute;
+  width: 20px; height: 20px;
+  opacity: 0.35;
+}
+.시작_코너.좌상 { top: 24px; left: 24px; border-top: 1px solid var(--색_시안); border-left: 1px solid var(--색_시안); }
+.시작_코너.우상 { top: 24px; right: 24px; border-top: 1px solid var(--색_시안); border-right: 1px solid var(--색_시안); }
+.시작_코너.좌하 { bottom: 24px; left: 24px; border-bottom: 1px solid var(--색_시안); border-left: 1px solid var(--색_시안); }
+.시작_코너.우하 { bottom: 24px; right: 24px; border-bottom: 1px solid var(--색_시안); border-right: 1px solid var(--색_시안); }
+
+/* 스캔라인 데코 (시작화면 내) */
+.시작_스캔바 {
+  position: absolute;
+  left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0,229,255,0.3), transparent);
+  animation: 시작_스캔 8s linear infinite;
+}
+@keyframes 시작_스캔 {
+  0%   { top: -1px; opacity:0; }
+  5%   { opacity:1; }
+  95%  { opacity:0.5; }
+  100% { top: 100%; opacity:0; }
+}
+
+/* ═══════════════════════════════════════════════
+   반응형
+═══════════════════════════════════════════════ */
+@media (max-width: 900px) {
+  #씬_대시보드 {
+    grid-template-columns: 1fr 1.8fr 1.4fr;
+    height: 310px;
+  }
+}
+@media (max-width: 768px) {
+  #헤더 { padding: 0 14px; }
+  #수치_바_영역 { gap: 6px; }
+  .수치_블록 { min-width: 60px; padding: 4px 8px; }
+  .수치_값 { font-size: 14px; }
+  #로그_패널 { width: 100%; }
+  #씬_대시보드 {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+    height: auto;
+    max-height: 50vh;
+    overflow-y: auto;
+  }
+  #대시_씬정보 { grid-column: 1; }
+  #대시_대사 { grid-column: 2; }
+  #대시_선택지 { grid-column: 1 / -1; border-top: 1px solid rgba(255,255,255,0.1); border-right: none; }
+}
+@media (max-width: 480px) {
+  .로고_부제 { display: none; }
+  .수치_라벨 { display: none; }
+  .수치_블록 { min-width: 48px; padding: 4px 6px; }
+  #씬_대시보드 { grid-template-columns: 1fr; height: auto; }
+  #대시_씬정보, #대시_대사, #대시_선택지 { grid-column: 1; border-right: none; border-top: 1px solid rgba(255,255,255,0.08); }
 }
 </style>
 </head>
 <body>
 
-<div id="title-screen">
-  <div class="t-logo">NEO-DOROTHY<br>2099</div>
-  <div class="t-sub">잃어버린 동기화 // LOST SYNC</div>
-  <div class="t-year">— 2099 —</div>
-  <div id="boot-log"></div>
-  <button id="start-btn" onclick="bootGame()">▶ SYSTEM BOOT</button>
-  <div class="t-ver">VER.2099.04.17 // BUILD_NEO_1.0.0 // NODE_KANSAS_ALPHA</div>
-</div>
+<!-- ════ 시작 화면 ════ -->
+<div id="시작_화면">
+  <div class="시작_코너 좌상"></div>
+  <div class="시작_코너 우상"></div>
+  <div class="시작_코너 좌하"></div>
+  <div class="시작_코너 우하"></div>
+  <div class="시작_스캔바"></div>
 
-<div id="trans"></div>
+  <div class="시작_컨텐츠">
+    <div class="시작_메타">24730029 &nbsp;|&nbsp; 정다연</div>
 
-<div id="ending">
-  <div class="end-label" id="end-label">SYSTEM LOG</div>
-  <div class="end-title" id="end-title"></div>
-  <div class="end-summary" id="end-summary"></div>
-  <div class="end-stats"  id="end-stats"></div>
-  <button id="restart-btn" onclick="restartGame()">▶ RESTART SYSTEM</button>
-</div>
-
-<header id="hud">
-  <div id="hud-logo">NEO-DOROTHY 2099</div>
-  <div class="hud-div"></div>
-  <div id="hud-center">
-    <div class="hud-stat h-sync">
-      <div class="hstat-lbl">SYNC</div>
-      <div class="hstat-num" id="num-sync">0</div>
-      <div class="hstat-bar"><div class="hstat-fill" id="fill-sync"></div></div>
+    <div class="시작_타이틀_상단" data-text="FOX SISTER">
+      FOX <span class="시작_강조">SISTER</span>
     </div>
-    <div class="hud-stat h-integ">
-      <div class="hstat-lbl">INTEG</div>
-      <div class="hstat-num" id="num-integ">0</div>
-      <div class="hstat-bar"><div class="hstat-fill" id="fill-integ"></div></div>
+    <div class="시작_타이틀_하단">GENE CONTAINMENT</div>
+
+    <div class="시작_구분선"></div>
+
+    <div class="시작_접속문구">
+      <span class="접속_브라켓">[</span>&nbsp;시스템 접속&nbsp;<span class="접속_브라켓">]</span>
     </div>
-    <div class="hud-stat h-noise">
-      <div class="hstat-lbl">NOISE</div>
-      <div class="hstat-num" id="num-noise">0</div>
-      <div class="hstat-bar"><div class="hstat-fill" id="fill-noise"></div></div>
+
+    <div class="시작_버튼_영역">
+      <button class="시작_버튼" onclick="시작화면_닫기()">SYSTEM ACCESS</button>
+      <div class="시작_버튼_힌트">— PRESS TO INITIALIZE —</div>
     </div>
   </div>
-  <div class="hud-div"></div>
-  <div id="admin-box">
-    <span class="adm-lbl">ADMIN_KEY:</span>
-    <span id="adm-val">FALSE</span>
+</div>
+
+<!-- ════ 파티클 캔버스 ════ -->
+<canvas id="파티클_캔버스"></canvas>
+
+<!-- ════ 노이즈 캔버스 ════ -->
+<canvas id="노이즈_캔버스"></canvas>
+
+<!-- ════ 스모그 레이어 ════ -->
+<div id="스모그_레이어"></div>
+
+<!-- ════ RGB 글리치 오버레이 ════ -->
+<div id="글리치_오버레이"></div>
+
+<!-- ════ 고정 헤더 ════ -->
+<header id="헤더">
+
+  <!-- 왼쪽: 로고 -->
+  <div class="로고_묶음">
+    <div class="로고_타이틀">FOX <span class="강조">SISTER</span></div>
+    <div class="로고_부제">GENE CONTAINMENT / GENETIC CLASSIFICATION SYSTEM v4.7.2</div>
+  </div>
+
+  <!-- 가운데: 수치 바 -->
+  <div id="수치_바_영역">
+    <div class="수치_블록" id="블록_증거" style="--수치색:var(--색_시안)">
+      <div class="수치_라벨">Evidence</div>
+      <div class="수치_값" id="값_증거">0</div>
+      <div class="수치_게이지_트랙"><div class="수치_게이지_채움" id="게이지_증거" style="width:0%"></div></div>
+    </div>
+    <div class="수치_블록" id="블록_신뢰" style="--수치색:var(--색_앰버)">
+      <div class="수치_라벨">Trust_f</div>
+      <div class="수치_값" id="값_신뢰">0</div>
+      <div class="수치_게이지_트랙"><div class="수치_게이지_채움" id="게이지_신뢰" style="width:0%"></div></div>
+    </div>
+    <div class="수치_블록" id="블록_오염" style="--수치색:var(--색_빨강)">
+      <div class="수치_라벨">Corruption</div>
+      <div class="수치_값" id="값_오염">0</div>
+      <div class="수치_게이지_트랙"><div class="수치_게이지_채움" id="게이지_오염" style="width:0%"></div></div>
+    </div>
+    <div class="수치_블록" id="블록_위험" style="--수치색:var(--색_보라)">
+      <div class="수치_라벨">Risk</div>
+      <div class="수치_값" id="값_위험">0</div>
+      <div class="수치_게이지_트랙"><div class="수치_게이지_채움" id="게이지_위험" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <!-- 오른쪽: 상태 + 어드민키 + 톱니바퀴 -->
+  <div class="헤더_우측">
+    <div class="헤더_접속상태">
+      TOWER-7 내부 접속중&nbsp;<span style="color:var(--색_녹색);animation:깜빡임 1.2s step-end infinite;display:inline-block">█</span>
+      <div id="어드민키_뱃지">◆ ADMIN_KEY ACTIVE</div>
+    </div>
+
+    <!-- 톱니바퀴 버튼 -->
+    <button id="로그_톱니바퀴" onclick="로그_토글()" title="시스템 로그">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+      </svg>
+    </button>
   </div>
 </header>
 
-<div id="main">
-  <div id="img-panel">
-    <div id="bg-a"></div>
-    <div id="bg-b"></div>
-    <div id="scene-overlay"></div>
-    <div id="scanlines"></div>
-    <div id="smog"></div>
-    <div id="glitch-layer"></div>
-    <div id="danger"></div>
-    <div class="bc" id="bc-tl"></div>
-    <div class="bc" id="bc-bl"></div>
-    
-    <div id="timer-ring">
-      <svg viewBox="0 0 52 52">
-        <circle cx="26" cy="26" r="22" fill="none" stroke="rgba(255,0,60,.2)" stroke-width="2.5"/>
-        <circle id="timer-arc" cx="26" cy="26" r="22" fill="none"
-                stroke="#FF003C" stroke-width="2.5"
-                stroke-dasharray="138" stroke-dashoffset="0"
-                stroke-linecap="round"/>
-      </svg>
-      <div id="timer-num">08</div>
-    </div>
+<!-- ════ 로그 드롭다운 패널 ════ -->
+<div id="로그_패널">
+  <div class="로그_패널_헤더">
+    <span>SYSTEM LOG</span>
+    <button class="로그_클리어" onclick="로그_클리어()">CLEAR</button>
   </div>
-
-  <div id="info-panel">
-    <div id="scene-title">—</div>
-    <div id="scene-tag">STANDBY</div>
-    <div id="ui-narr">시스템 대기 중...</div>
-
-    <div id="dialog-block" onclick="onDialogClick()">
-      <div id="char-name" class="cn-dim">[ NARRATION ]</div>
-      <div class="dialog-scroll" id="dialog-scroll">
-        <div id="dialog-text"></div>
-        <span id="cursor"></span>
-      </div>
-      <div id="skip-hint">[ SPACE / CLICK — 스킵 ]</div>
-      <div id="cont-hint">▶ 선택지를 고르세요 ◀</div>
-    </div>
-
-    <div class="hr"></div>
-    <div class="ctrl-row">
-      <button class="ctrl-btn" id="btn-back" onclick="goBack()">← BACK</button>
-      <button class="ctrl-btn" id="btn-skip" onclick="onSkipClick()">SKIP ▶</button>
-    </div>
-    <div id="choices-wrap"></div>
+  <div id="로그_내용">
+    <div class="로그_줄"><span class="로그_시간">[00:00:00]</span><span class="로그_일반"> 시스템 초기화 완료. 검증관 ID: ΩK-001 접속.</span></div>
   </div>
 </div>
 
+<!-- ════ 메인 본문 ════ -->
+<main id="본문">
+
+  <!-- 조건 알림 바 -->
+  <div id="조건_알림_바"></div>
+
+  <!-- 롤백 배너 -->
+  <div id="롤백_배너">⚠ CRITICAL ERROR — LOG ROLLBACK INITIATED — CHECKPOINT RESTORED</div>
+
+  <!-- 씬 이미지 스테이지 -->
+  <div id="씬_스테이지">
+    <!-- 씬 렌더링이 이미지 슬롯을 여기에 주입 -->
+    <label class="씬_이미지_업로드_버튼" id="스테이지_업로드_버튼" style="display:none">
+      ⬆ 이미지 업로드
+      <input type="file" accept="image/*" id="스테이지_파일_입력">
+    </label>
+  </div>
+
+  <!-- 하단 3단 대시보드 -->
+  <div id="씬_대시보드">
+    <!-- 컬럼 1: 씬 정보 -->
+    <div class="대시_컬럼" id="대시_씬정보">
+      <div class="대시_페이즈" id="대시_페이즈_텍스트">—</div>
+      <div class="대시_씬ID" id="대시_씬ID_텍스트">—</div>
+      <div class="대시_씬제목" id="대시_씬제목_텍스트">—</div>
+      <div class="대시_위치태그" id="대시_위치_텍스트">—</div>
+      <div class="대시_판정" id="대시_판정_텍스트" style="display:none">—</div>
+    </div>
+
+    <!-- 컬럼 2: 배경묘사 + 대사 -->
+    <div class="대시_컬럼" id="대시_대사">
+      <div class="대시_배경묘사" id="대시_배경묘사_텍스트">—</div>
+      <div class="대시_대사_컨테이너" id="대시_대사_영역">
+        <!-- 대사 블록 주입 -->
+      </div>
+    </div>
+
+    <!-- 컬럼 3: 선택지 -->
+    <div class="대시_컬럼" id="대시_선택지">
+      <div class="대시_선택지_타이틀">— SELECT ACTION —</div>
+      <div id="대시_선택지_목록">
+        <!-- 선택지 버튼 주입 -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 레거시 패널 (숨김 — JS 참조용) -->
+  <div id="씬_패널" style="display:none"></div>
+
+</main>
+
+<!-- ════ 엔딩 화면 ════ -->
+<div id="엔딩_화면">
+  <div class="엔딩_내부" id="엔딩_내부_컨텐츠"></div>
+</div>
+
 <script>
-// ================================================================
-// NEO-DOROTHY 2099 — 시각적 효과 하이라이트 + 타이핑 엔진 개선본
-// ================================================================
+/* ═══════════════════════════════════════════════════════════════
+   FOX SISTER : Gene Containment — 메인 게임 스크립트
+═══════════════════════════════════════════════════════════════ */
 
-const state = {
-  currentScene:'S1', WARM:0, COLD:0, GLITCH:0,
-  flags:{ scarecrow_friend:false, tin_friend:false, lion_friend:false, from_alt:false, WITCH_CORE:false }
+/* ─────────────────────────────────────────────────────────────
+   [1] 게임 상태 객체
+───────────────────────────────────────────────────────────── */
+let 게임상태 = {
+  증거:     0,      // Evidence  — 독자 조사 행보
+  신뢰:     0,      // Trust_f   — 체제 순응
+  오염:     0,      // Corruption — 오염 누적
+  위험:     0,      // Risk       — 위험 행동
+  어드민키: false,  // Admin_Key — 에어락 통과 조건
+  s2선택:   null,   // S2 선택 기억 → S3 분기
+  루프횟수: 0,      // RE_S4 반복 카운터
 };
-const sceneHistory = [];
-const snap = () => ({ WARM:state.WARM, COLD:state.COLD, GLITCH:state.GLITCH, flags:{...state.flags} });
 
-/* ── 씬 데이터 (하이라이트 태그 삽입) ── */
-const sceneData = {
-  'S1':{
-    img:'https://images.unsplash.com/photo-1518770660439-4636190af475?w=1400&q=90&fit=crop',
-    overlay:'linear-gradient(160deg,rgba(0,40,20,.38)0%,rgba(8,11,15,.55)100%)',
-    tint:'rgba(0,255,102,.06)',
-    title:'S1 — 데이터 폭풍 속으로',
-    tag:'PHASE 1  ·  KANSAS DATA TORNADO',
-    narr:'회색빛 캔자스 서버. 거대한 데이터 토네이도가 화면을 집어삼키듯 휘몰아친다.',
-    char:null,
-    text:()=>`<span class="hl-red">시스템 붕괴.</span>\n당신의 의식이 데이터의 바다로 흩어집니다.\n\n캔자스로 돌아가려면 <span class="hl-green">에메랄드 성</span>을 찾아야 합니다.`,
-    choices:[
-      {text:'눈을 감고\n흐름에 맡긴다', type:'warm',icon:'♡',effects:{WARM:10},next:'S2'},
-      {text:'폭풍의 눈을\n똑바로 본다', type:'cold',icon:'⊙',effects:{COLD:10},next:'S2'}
-    ]
-  },
-  'S2':{
-    img:'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=1400&q=90&fit=crop',
-    overlay:'linear-gradient(160deg,rgba(0,30,15,.35)0%,rgba(8,11,15,.55)100%)',
-    tint:'rgba(0,255,100,.07)',
-    title:'S2 — 노란 회로의 길',
-    tag:'PHASE 1  ·  YELLOW CIRCUIT ROAD',
-    narr:'끊어진 노란색 회로망 위. 낡아서 지혜 모듈이 타버린 허수아비 봇이 매달려 있다.',
-    char:'허수아비 봇', charType:'normal',
-    text:(s)=>s.COLD > s.WARM
-      ?`끊어진 회로망 위, 허수아비의 모니터 얼굴에 노이즈가 발생합니다.\n\n<span class="hl-amber">[NOISE INTERFERENCE DETECTED]</span>\n\n"내 머릿속엔 <span class="hl-amber">쓰레기 데이터</span>뿐이야...\n네 안의 무언가로 날 채워줄 수 있어?"`
-      :`"내 머릿속엔 <span class="hl-amber">쓰레기 데이터</span>뿐이야...\n네 안의 무언가로 날 채워줄 수 있어?"`,
-    choices:[
-      {text:'따뜻한 기억\n데이터 나눔',  type:'warm',icon:'♡',effects:{WARM:20},flags:{scarecrow_friend:true},next:'S3'},
-      {text:'차가운 논리\n코드 복사', type:'cold',icon:'⊙',effects:{COLD:20},next:'S3'}
-    ]
-  },
-  'S3':{
-    img:'https://images.unsplash.com/photo-1581090464777-f3220bbe1b8b?w=1400&q=90&fit=crop',
-    overlay:'linear-gradient(160deg,rgba(30,18,6,.38)0%,rgba(8,11,15,.55)100%)',
-    tint:'rgba(180,80,0,.06)',
-    title:'S3 — 녹슨 강철의 숲',
-    tag:'PHASE 1  ·  RUSTY STEEL FOREST',
-    narr:'멈춰버린 유압 공장. 하트 슬롯이 비어있는 양철 사이보그 조우.',
-    char:'양철 사이보그', charType:'normal',
-    text:(s)=>s.WARM > s.COLD && s.flags.scarecrow_friend
-      ?`허수아비가 먼저 다가가 위로의 제스처를 취합니다.\n\n"감정 에뮬레이션 실패.\n내게 뜨거운 <span class="hl-red">'고동'</span>을 줄 수 있는가? 아니라면 <span class="hl-red">전투 모드</span>로 전환하겠다."`
-      :`멈춰버린 유압 공장. 양철 사이보그가 당신을 가로막습니다.\n\n"감정 에뮬레이션 실패.\n내게 뜨거운 <span class="hl-red">'고동'</span>을 줄 수 있는가? 아니라면 <span class="hl-red">전투 모드</span>로 전환하겠다."`,
-    choices:[
-      {text:'뛰는 심장(공감)\n연결', type:'warm',icon:'♡',effects:{WARM:20},flags:{tin_friend:true},next:'S4'},
-      {text:'전투용 태엽\n강제 회전', type:'dark',icon:'⚡',effects:{COLD:20,GLITCH:10},next:'S4'}
-    ]
-  },
-  'S4':{
-    img:'https://images.unsplash.com/photo-1515630278258-407f66498911?w=1400&q=90&fit=crop',
-    overlay:'linear-gradient(160deg,rgba(8,6,20,.38)0%,rgba(8,11,15,.55)100%)',
-    tint:'rgba(100,0,180,.05)',
-    title:'S4 — 두려움의 방화벽',
-    tag:'PHASE 1  ·  FEAR FIREWALL GATE',
-    narr:'거대한 톨게이트. 덩치는 산만 하지만 미세한 에러에도 벌벌 떠는 사자 백신.',
-    char:'사자 백신', charType:'normal',
-    text:(s)=>s.WARM > s.COLD
-      ?`당신의 따뜻한 기운 때문인지,\n사자 주변의 위협적인 붉은 경고등이 <span class="hl-green">노란색으로 안정화</span>됩니다.\n\n"크르릉... 난 백신인데, <span class="hl-red">오류</span>가 너무 무서워!\n제발 내게 다가오지 마!"`
-      :`거대한 톨게이트. 사자 백신이 접근을 경계합니다.\n\n"크르릉... 난 백신인데, <span class="hl-red">오류</span>가 너무 무서워!\n제발 내게 다가오지 마!"`,
-    choices:[
-      {text:'손을 잡고\n함께 격려',     type:'warm',icon:'♡',effects:{WARM:20},flags:{lion_friend:true},next:'S5'},
-      {text:'두려움 코드\n강제 삭제', type:'dark',icon:'⚡',effects:{COLD:20,GLITCH:10},next:'S5'}
-    ]
-  },
-  'S5':{
-    img:'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1400&q=90&fit=crop',
-    overlay:'linear-gradient(160deg,rgba(30,4,4,.40)0%,rgba(8,11,15,.55)100%)',
-    tint:'rgba(255,0,51,.09)',
-    title:'S5 — 서쪽 마녀의 그림자',
-    tag:'PHASE 2  ·  WEST_WITCH.EXE AMBUSH',
-    narr:'에메랄드로 가는 길목이 붉게 오염됨. 바이러스 군단 W.I.T.C.H 기습.',
-    char:'서쪽 마녀', charType:'red',
-    text:(s)=>s.WARM > s.COLD
-      ?`동료들이 스스로 당신을 가로막으며 <span class="hl-cyan">방어 진형</span>을 구축합니다.\n\n"<span class="hl-red">어딜 감히 에메랄드 성을 넘봐?</span>\n네 따뜻한 <span class="hl-cyan">영혼 코드</span>를 이리 내놔라!"`
-      :`홀로 바이러스 군단과 마주합니다.\n\n"<span class="hl-red">어딜 감히 에메랄드 성을 넘봐?</span>\n네 따뜻한 <span class="hl-cyan">영혼 코드</span>를 이리 내놔라!"`,
-    choices:[
-      {text:'동료와 서로 지키며\n방어',   type:'warm',icon:'♡',effects:{WARM:30},next:'S6'},
-      {text:'마녀의 글리치\n역이용', type:'dark',icon:'⚡',effects:{COLD:20,GLITCH:30},next:'S6_ALT'}
-    ]
-  },
-  'S6_ALT':{
-    img:'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1400&q=90&fit=crop',
-    overlay:'linear-gradient(160deg,rgba(10,0,22,.45)0%,rgba(8,11,15,.60)100%)',
-    tint:'rgba(140,0,220,.08)',
-    title:'S6_ALT — 어두운 숲의 유혹',
-    tag:'PHASE 2  ·  DARK FOREST LOOP',
-    narr:'마녀의 힘을 빨아들여 도착한 기하학적이고 어두운 숲. 마녀의 코어가 요동침.',
-    char:null,
-    text:(s)=>s.GLITCH >= 100 
-      ?`데이터 외형이 완전히 <span class="hl-red">붉게 타락</span>했습니다.\n더 이상 돌아갈 곳은 없습니다.\n\n"이 <span class="hl-purple">강력한 힘</span>... 내가 통제할 수 있을 것 같아.\n하지만 곁에 있는 친구들은 날 <span class="hl-red">괴물</span>로 보겠지."`
-      :`당신의 데이터 외형이 점차 <span class="hl-red">붉게 타락</span>하고 있습니다.\n\n"이 <span class="hl-purple">강력한 힘</span>... 내가 통제할 수 있을 것 같아.\n하지만 곁에 있는 친구들은 날 <span class="hl-red">괴물</span>로 보겠지."`,
-    choices:[
-      {text:'유혹을 뿌리치고\n돌아감',  type:'warm',icon:'♡',condition:(s)=>s.GLITCH<100, disabledText:'GLITCH 100 이상 — 돌아갈 수 없음', effects:{WARM:10,GLITCH:-20},flags:{from_alt:true},next:'S6'},
-      {text:'마녀의 코어\n완전히 흡수', type:'dark',icon:'⚡',effects:{COLD:50,GLITCH:100},flags:{WITCH_CORE:true},next:'S7'}
-    ]
-  },
-  'S6':{
-    img:'https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=1400&q=90&fit=crop',
-    overlay:'linear-gradient(160deg,rgba(0,28,12,.35)0%,rgba(8,11,15,.52)100%)',
-    tint:'rgba(0,220,90,.07)',
-    title:'S6 — 에메랄드 성의 문',
-    tag:'PHASE 2  ·  EMERALD CITY GATE',
-    narr:'눈부신 녹색 코드의 거대한 문. 원칙주의자 문지기 프로그램이 길을 막음.',
-    char:'문지기', charType:'normal',
-    text:(s)=>s.flags.from_alt
-      ?`당신의 외형이 상처 입었으나 <span class="hl-green">안정적인 빛</span>을 내고 있습니다.\n\n"마녀를 해치웠다는 증명(<span class="hl-amber">빗자루</span>) 없이는\n<span class="hl-green">위대한 오즈</span>를 알현할 수 없다."`
-      :`눈부신 녹색 코드의 거대한 문.\n\n"마녀를 해치웠다는 증명(<span class="hl-amber">빗자루</span>) 없이는\n<span class="hl-green">위대한 오즈</span>를 알현할 수 없다."`,
-    choices:[
-      {text:'진심을 담아\n문지기 설득',  type:'neutral',icon:'▸',condition:(s)=>s.WARM>=40,disabledText:'WARM ≥ 40 필요 — 설득 불가',effects:{},next:'S7'},
-      {text:'마녀의 성으로 향함\n(위험 감수)', type:'dark',icon:'⚡',effects:{},next:'S6_ALT'}
-    ]
-  },
-  'S7':{
-    img:'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=1400&q=90&fit=crop',
-    overlay:'linear-gradient(160deg,rgba(8,6,22,.40)0%,rgba(8,11,15,.55)100%)',
-    tint:'rgba(100,0,180,.07)',
-    title:'S7 — 위대한 오즈의 장막',
-    tag:'PHASE 3  ·  THE GREAT OZ CHAMBER',
-    narr:'장엄한 홀. 그러나 장막 뒤에는 권한을 잃고 숨어있는 조그맣고 낡은 구형 서버가 있다.',
-    char:'오즈 코어', charType:'purple',
-    text:(s)=>s.GLITCH >= 100
-      ?`당신 주변 동료들의 눈빛이 죽어있습니다. <span class="hl-red">(통제 상태)</span>\n\n장막이 걷히고 조그맣고 낡은 구형 서버가 말합니다.\n\n"나는 <span class="hl-green">위대하고 전능한...</span> (치직)\n제발 날 <span class="hl-red">지우지 말아다오.</span> 난 아무 힘도 없는 껍데기일 뿐이야."`
-      :`장막이 걷힙니다. 조그맣고 낡은 구형 서버가 숨어있습니다.\n\n"나는 <span class="hl-green">위대하고 전능한...</span> (치직)\n제발 날 <span class="hl-red">지우지 말아다오.</span> 난 아무 힘도 없는 껍데기일 뿐이야."`,
-    choices:[
-      {text:'오즈 용서 및\n스스로 성취', type:'warm',icon:'♡',condition:(s)=>s.WARM>=60,disabledText:'WARM ≥ 60 필요',effects:{},next:'END_A'},
-      {text:'오즈 삭제 및\n통제권 강탈', type:'dark',icon:'⚡',condition:(s)=>s.COLD>=60||s.flags.WITCH_CORE,disabledText:'COLD ≥ 60 또는 CORE 필요',effects:{},next:'END_B'}
-    ]
-  },
-  'END_A':{
-    img:'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=1400&q=90&fit=crop',
-    overlay:'linear-gradient(160deg,rgba(28,22,4,.35)0%,rgba(8,11,15,.50)100%)',
-    tint:'rgba(220,170,0,.06)',
-    title:'ENDING A — 집으로 가는 길',
-    tag:'HAPPY ENDING  ·  RETURN TO KANSAS',
-    narr:'에메랄드 성에 따뜻한 황금빛이 감돌며, 캔자스로 향하는 포트가 열림.',
-    char:null,
-    text:()=>`동료들이 각자의 결핍(지혜, 감정, 용기)을\n<span class="hl-green">스스로 채웠음</span>을 깨달았습니다.\n\n친구들의 따뜻한 배웅 속, 당신은 시스템에\n<span class="hl-amber">온기</span>를 남기고 무사히 로그아웃합니다.\n\n<span class="hl-cyan">[결과] 인간성 보존 및 안전한 귀환. (FIN)</span>`,
-    ending:{type:'GOOD',label:'해피 엔딩 // ENDING A',title:'집으로 가는 길',color:'#00FF66'}
-  },
-  'END_B':{
-    img:'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1400&q=90&fit=crop',
-    overlay:'linear-gradient(160deg,rgba(28,4,4,.42)0%,rgba(8,11,15,.58)100%)',
-    tint:'rgba(255,0,0,.09)',
-    title:'ENDING B — 에메랄드의 폭군',
-    tag:'DARK ENDING  ·  EMERALD TYRANT',
-    narr:'에메랄드 성이 차갑고 붉은 노이즈로 덮임. 도로시가 마녀의 옥좌에 앉음.',
-    char:'도로시', charType:'red',
-    text:()=>`동료들은 <span class="hl-red">감정이 거세된 채</span>\n당신을 지키는 꼭두각시 병사로 전락했습니다.\n\n마녀의 옥좌에 앉아 선언합니다.\n\n"<span class="hl-txt-dim">쓸모없는 집(캔자스)은 필요 없어.</span> 이제 내가 이 세계의 <span class="hl-red">룰</span>이다."\n\n<span class="hl-red">[결과] 시스템 통제 장악 및 영원한 고립. (FIN)</span>`,
-    ending:{type:'DARK',label:'다크 엔딩 // ENDING B',title:'에메랄드의 폭군',color:'#FF003C'}
-  },
-  'BAD_END':{
-    img:null,
-    overlay:'linear-gradient(180deg,#020305 0%,#080a0d 100%)',
-    tint:null,
-    title:'BAD END — 길 잃은 아이',
-    tag:'ERROR 404  ·  LOST_CHILD.ERR',
-    narr:'화면이 암전되며 페이지를 찾을 수 없다는 에러 메시지 출력.',
-    char:'시스템', charType:'red',
-    text:()=>`<span class="hl-red">404 — PAGE NOT FOUND</span>\n\n선택의 숲에서 길을 잃었습니다.\n\n이야기의 첫 장으로 돌아가 다시 시작하시겠습니까?`,
-    ending:{type:'BAD',label:'배드 엔딩',title:'길 잃은 아이',color:'#555550'},
-    choices:[{text:'첫 페이지로\n돌아가기',type:'neutral',icon:'▸',effects:{},action:()=>restartGame()}]
+/* ─────────────────────────────────────────────────────────────
+   [2] 씬별 이미지 경로 — 교체 시 여기만 수정
+───────────────────────────────────────────────────────────── */
+const 씬_이미지 = {
+  S1: null, S2: null, S3: null,
+  S4: null, S5: null, RE_S4: null, S6: null,
+};
+
+const 씬_배경명 = {
+  S1: '격리 타워 내부', S2: '폐기 서버 구역', S3: '가족의 식탁',
+  S4: '야간 격리 구역', S5: '중앙 복도 추격전',
+  RE_S4: '로그 롤백', S6: '에어락 게이트',
+};
+
+/* ─────────────────────────────────────────────────────────────
+   [3] 수치 조작 유틸
+───────────────────────────────────────────────────────────── */
+function 범위고정(값) { return Math.max(0, Math.min(100, 값)); }
+
+function 수치변경(변화량_객체) {
+  for (const [키, 변화] of Object.entries(변화량_객체)) {
+    if (키 === '어드민키') { 게임상태.어드민키 = 변화; continue; }
+    게임상태[키] = 범위고정((게임상태[키] || 0) + 변화);
   }
-};
+  수치_UI_전체갱신();
+}
 
-/* ── 배경 크로스페이드 (이미지/오버레이 완전 분리) ── */
-let bgActive = 'a';
+function 수치_UI_전체갱신() {
+  const 수치_설정맵 = {
+    증거: { 값ID:'값_증거', 게이지ID:'게이지_증거', 블록ID:'블록_증거', 위험임계:80,   달성임계:40 },
+    신뢰: { 값ID:'값_신뢰', 게이지ID:'게이지_신뢰', 블록ID:'블록_신뢰', 위험임계:null, 달성임계:60 },
+    오염: { 값ID:'값_오염', 게이지ID:'게이지_오염', 블록ID:'블록_오염', 위험임계:50,   달성임계:null },
+    위험: { 값ID:'값_위험', 게이지ID:'게이지_위험', 블록ID:'블록_위험', 위험임계:70,   달성임계:null },
+  };
 
-function applyBg(sc) {
-  const bgA  = document.getElementById('bg-a');
-  const bgB  = document.getElementById('bg-b');
-  const ovEl = document.getElementById('scene-overlay');
-  const cur  = bgActive === 'a' ? bgA : bgB;
-  const nxt  = bgActive === 'a' ? bgB : bgA;
+  for (const [수치명, 설정] of Object.entries(수치_설정맵)) {
+    const 현재값 = 게임상태[수치명];
+    document.getElementById(설정.값ID).textContent = 현재값;
+    document.getElementById(설정.게이지ID).style.width = 현재값 + '%';
+    const 블록 = document.getElementById(설정.블록ID);
+    블록.classList.remove('위험', '달성');
+    if (설정.위험임계 !== null && 현재값 >= 설정.위험임계) 블록.classList.add('위험');
+    else if (설정.달성임계 !== null && 현재값 >= 설정.달성임계) 블록.classList.add('달성');
+  }
 
-  ovEl.style.background = sc.overlay || 'transparent';
-  if (sc.tint) ovEl.style.boxShadow = `inset 0 0 220px ${sc.tint}`;
-  else ovEl.style.boxShadow = 'none';
+  document.getElementById('어드민키_뱃지').style.display = 게임상태.어드민키 ? 'block' : 'none';
+  조건_알림바_갱신();
+}
 
-  if (sc.img) {
-    const img = new Image();
-    img.onload = () => {
-      nxt.style.backgroundImage    = `url("${sc.img}")`;
-      nxt.style.backgroundSize     = 'cover';
-      nxt.style.backgroundPosition = 'center center';
-      nxt.style.backgroundRepeat   = 'no-repeat';
-      nxt.style.transition = 'opacity 1.3s ease';
-      nxt.style.opacity    = '1';
-      cur.style.transition = 'opacity 1.3s ease';
-      cur.style.opacity    = '0';
-      bgActive = bgActive === 'a' ? 'b' : 'a';
-    };
-    img.onerror = () => {
-      nxt.style.backgroundImage    = 'linear-gradient(135deg,#0a0f18 0%,#050810 100%)';
-      nxt.style.backgroundSize     = 'cover';
-      nxt.style.transition = 'opacity 0.8s ease';
-      nxt.style.opacity    = '1';
-      cur.style.opacity    = '0';
-      bgActive = bgActive === 'a' ? 'b' : 'a';
-    };
-    img.src = sc.img;
+function 조건_알림바_갱신() {
+  const 알림목록 = [];
+  if (게임상태.증거 >= 40)  알림목록.push('✓ Ev ≥ 40 — 누이 대화 루트 개방');
+  if (게임상태.신뢰 >= 60)  알림목록.push('✓ T_f ≥ 60 — 체제 신뢰 확보');
+  if ((게임상태.증거 + 게임상태.신뢰) >= 120) 알림목록.push('✓ Ev+T_f ≥ 120 — 아버지 설득 가능');
+  if (게임상태.오염 >= 50)  알림목록.push('⚠ Corr ≥ 50 — 환각 리스크 발동');
+  if (게임상태.위험 >= 70)  알림목록.push('⚠ Risk ≥ 70 — 보안 경계 최고 단계');
+  if (게임상태.어드민키)    알림목록.push('◆ ADMIN_KEY 보유 — 에어락 통과 가능');
+
+  const 바 = document.getElementById('조건_알림_바');
+  if (알림목록.length > 0) {
+    바.style.display = 'block';
+    바.innerHTML = 알림목록.join('　|　');
   } else {
-    nxt.style.backgroundImage    = 'linear-gradient(135deg,#020305 0%,#080a0d 100%)';
-    nxt.style.backgroundSize     = 'cover';
-    nxt.style.backgroundPosition = 'center';
-    nxt.style.transition = 'opacity 0.8s ease';
-    nxt.style.opacity    = '1';
-    cur.style.transition = 'opacity 0.8s ease';
-    cur.style.opacity    = '0';
-    bgActive = bgActive === 'a' ? 'b' : 'a';
+    바.style.display = 'none';
   }
 }
 
-function prefetchImg(sc) {
-  if (sc && sc.img) { const i = new Image(); i.src = sc.img; }
+/* ─────────────────────────────────────────────────────────────
+   [4] 시스템 로그 (톱니바퀴 드롭다운)
+───────────────────────────────────────────────────────────── */
+let 로그_카운터 = 0;
+
+function 로그추가(메시지, 타입) {
+  타입 = 타입 || '일반';
+  로그_카운터++;
+  const 분 = String(Math.floor(로그_카운터 / 60)).padStart(2, '0');
+  const 초 = String(로그_카운터 % 60).padStart(2, '0');
+  const 내용 = document.getElementById('로그_내용');
+  const 줄 = document.createElement('div');
+  줄.className = '로그_줄';
+  줄.innerHTML = `<span class="로그_시간">[00:${분}:${초}]</span><span class="로그_${타입}"> ${메시지}</span>`;
+  내용.appendChild(줄);
+  내용.scrollTop = 내용.scrollHeight;
 }
 
-/* ── 원형 타이머 ── */
-let timerVal = 8, timerIntv = null;
-const CIRC = 138;
-
-function startTimer() {
-  clearInterval(timerIntv); timerVal = 8; renderTimerUI();
-  document.body.classList.remove('timer-warn');
-  timerIntv = setInterval(() => {
-    timerVal--;
-    renderTimerUI();
-    if (timerVal <= 2) document.body.classList.add('timer-warn');
-    if (timerVal <= 0) {
-      applyEffects({GLITCH:3},{});
-      timerVal = 8; document.body.classList.remove('timer-warn'); renderTimerUI();
-    }
-  }, 1000);
+function 로그_토글() {
+  const 패널 = document.getElementById('로그_패널');
+  const 버튼 = document.getElementById('로그_톱니바퀴');
+  const 열림 = 패널.classList.toggle('열림');
+  버튼.classList.toggle('활성', 열림);
 }
-function renderTimerUI() {
-  document.getElementById('timer-num').textContent = String(timerVal).padStart(2,'0');
-  document.getElementById('timer-arc').style.strokeDashoffset = CIRC - CIRC * timerVal / 8;
-}
-function stopTimer() { clearInterval(timerIntv); }
 
-/* ── HTML 지원 타이핑 엔진 ── */
-let typingTimer=null, isTyping=false, fullText='', onTypeDone=null;
-function startTyping(text, cb) {
-  fullText=text; isTyping=true; onTypeDone=cb;
-  const el=document.getElementById('dialog-text');
-  const cur=document.getElementById('cursor');
-  const scrl=document.getElementById('dialog-scroll');
-  el.innerHTML=''; cur.style.display='inline-block';
-  document.getElementById('skip-hint').style.display='block';
-  document.getElementById('cont-hint').style.display='none';
-  document.getElementById('btn-skip').disabled=false;
-  clearTimeout(typingTimer);
-  
-  let currentHTML = "";
-  let i = 0;
-  
-  (function tick(){
-    if(!isTyping) return;
-    if(i < fullText.length){
-      // HTML 태그일 경우 딜레이 없이 한 번에 추가
-      if(fullText[i] === '<') {
-        let tag = "";
-        while(fullText[i] !== '>' && i < fullText.length) {
-          tag += fullText[i];
-          i++;
-        }
-        tag += '>';
-        currentHTML += tag;
-        i++;
-        tick(); // 태그 추가 후 지연 없이 바로 다음 글자로
-        return;
+function 로그_클리어() {
+  document.getElementById('로그_내용').innerHTML = '';
+  로그추가('로그 초기화됨.', '경고');
+}
+
+/* 패널 외부 클릭 시 닫기 */
+document.addEventListener('click', function(e) {
+  const 패널 = document.getElementById('로그_패널');
+  const 버튼 = document.getElementById('로그_톱니바퀴');
+  if (패널.classList.contains('열림') && !패널.contains(e.target) && !버튼.contains(e.target)) {
+    패널.classList.remove('열림');
+    버튼.classList.remove('활성');
+  }
+});
+
+/* ─────────────────────────────────────────────────────────────
+   [5] 씬 렌더링 엔진
+───────────────────────────────────────────────────────────── */
+function 씬_렌더링(설정) {
+  document.getElementById('롤백_배너').style.display = 'none';
+
+  const 이미지_경로 = 씬_이미지[설정.id] || null;
+  const 배경명 = 씬_배경명[설정.id] || 설정.id;
+
+  /* ── 스테이지 이미지 영역 ── */
+  const 스테이지 = document.getElementById('씬_스테이지');
+  // 기존 플레이스홀더/이미지 제거 (업로드 버튼 제외)
+  Array.from(스테이지.children).forEach(function(el) {
+    if (!el.classList.contains('씬_이미지_업로드_버튼')) 스테이지.removeChild(el);
+  });
+
+  if (이미지_경로) {
+    const img = document.createElement('div');
+    img.className = '씬_이미지_래퍼';
+    img.id = '이미지래퍼_' + 설정.id;
+    img.innerHTML = `<img src="${이미지_경로}" alt="${배경명}" onload="this.classList.add('로딩완료')">`;
+    스테이지.insertBefore(img, 스테이지.firstChild);
+  } else {
+    const ph = document.createElement('div');
+    ph.className = '스테이지_플레이스홀더';
+    ph.id = '이미지래퍼_' + 설정.id;
+    ph.innerHTML = `
+      <div class="플레이스홀더_씬ID_대">${설정.id}</div>
+      <div class="플레이스홀더_배경명_대">${배경명}</div>`;
+    스테이지.insertBefore(ph, 스테이지.firstChild);
+  }
+
+  // 업로드 버튼 연결
+  const 업로드버튼 = document.getElementById('스테이지_업로드_버튼');
+  업로드버튼.style.display = 'flex';
+  const 파일입력 = document.getElementById('스테이지_파일_입력');
+  파일입력.onchange = function() { 이미지_업로드(설정.id, 파일입력); };
+
+  /* ── 대시보드 컬럼1: 씬 정보 ── */
+  document.getElementById('대시_페이즈_텍스트').textContent = 설정.페이즈;
+  document.getElementById('대시_씬ID_텍스트').textContent = 설정.id;
+  document.getElementById('대시_씬제목_텍스트').textContent = 씬_배경명[설정.id] || 설정.id;
+  document.getElementById('대시_위치_텍스트').textContent = 설정.id + ' — ' + (씬_배경명[설정.id] || '').toUpperCase();
+
+  const 판정el = document.getElementById('대시_판정_텍스트');
+  if (설정.판정조건) {
+    판정el.textContent = '▸ ' + 설정.판정조건;
+    판정el.style.display = 'inline-block';
+  } else {
+    판정el.style.display = 'none';
+  }
+
+  /* ── 대시보드 컬럼2: 배경묘사 + 대사 ── */
+  document.getElementById('대시_배경묘사_텍스트').innerHTML = 설정.배경묘사;
+
+  const 대사영역 = document.getElementById('대시_대사_영역');
+  대사영역.innerHTML = 설정.대사목록.map(function(d, i) {
+    const 딜레이 = 0.06 + i * 0.12;
+    return `<div class="대시_대사_블록" style="opacity:0;transform:translateY(6px);animation:페이드업 0.35s ease ${딜레이}s forwards" data-typing-delay="${딜레이 + 0.1}" data-text="${d.텍스트.replace(/"/g,'&quot;')}">
+      <div class="대시_화자명 ${d.화자클래스}">${d.화자명}</div>
+      <div class="대시_대사_텍스트${d.지문여부 ? ' 지문_텍스트' : ''} 타이핑_대기"></div>
+    </div>`;
+  }).join('');
+
+  /* 타이핑 애니메이션 실행 */
+  대사영역.querySelectorAll('[data-typing-delay]').forEach(function(블록) {
+    const 딜레이ms = parseFloat(블록.dataset.typingDelay) * 1000;
+    const 원본텍스트 = 블록.dataset.text;
+    const 텍스트el = 블록.querySelector('.타이핑_대기');
+    setTimeout(function() {
+      타이핑_애니메이션(텍스트el, 원본텍스트);
+    }, 딜레이ms);
+  });
+
+  /* ── 대시보드 컬럼3: 선택지 ── */
+  const 선택지목록 = document.getElementById('대시_선택지_목록');
+  선택지목록.style.display = 'flex';
+  선택지목록.style.flexDirection = 'column';
+  선택지목록.style.gap = '8px';
+  선택지목록.style.flex = '1';
+  선택지목록.style.minHeight = '0';
+  선택지목록.innerHTML = 설정.선택목록.map(function(s) {
+    const 잠금 = s.잠금여부 || false;
+    // 본문에서 ' — xxx' 패턴 제거 (혁명, 생존, 포기 등 결과 힌트 숨김)
+    const 표시_본문 = s.본문.replace(/\s*[—\-–]\s*.+$/, '').trim();
+    return `<button class="대시_선택_버튼 ${s.색클래스}${잠금 ? ' 잠금' : ''}"
+        onclick="${잠금 ? '' : `선택_처리('${s.액션}')`}"
+        ${잠금 ? 'title="조건 미충족"' : ''}>
+      <div class="홀로_스캔"></div>
+      <div class="홀로_코너 좌상"></div>
+      <div class="홀로_코너 우상"></div>
+      <div class="홀로_코너 좌하"></div>
+      <div class="홀로_코너 우하"></div>
+      <div class="대시_선택_레이블">[${s.레이블}]</div>
+      <div class="대시_선택_내용">
+        <div class="대시_선택_본문">${표시_본문}</div>
+      </div>
+    </button>`;
+  }).join('');
+
+  /* 등장 애니메이션 */
+  const 대시 = document.getElementById('씬_대시보드');
+  대시.style.animation = 'none';
+  void 대시.offsetWidth;
+  대시.style.animation = '씬_등장 0.28s ease';
+}
+
+/* ─────────────────────────────────────────────────────────────
+   [6] 이미지 업로드 핸들러
+───────────────────────────────────────────────────────────── */
+function 이미지_업로드(씬ID, 입력) {
+  const 파일 = 입력.files[0];
+  if (!파일) return;
+  const URL경로 = URL.createObjectURL(파일);
+  씬_이미지[씬ID] = URL경로;
+  const 래퍼 = document.getElementById('이미지래퍼_' + 씬ID);
+  if (래퍼) {
+    래퍼.className = '씬_이미지_래퍼';
+    래퍼.innerHTML = `<img src="${URL경로}" alt="${씬_배경명[씬ID]}" onload="this.classList.add('로딩완료')">`;
+  }
+  로그추가(`[${씬ID}] 이미지 업로드 완료.`, '성공');
+}
+
+/* ─────────────────────────────────────────────────────────────
+   [7] 씬 정의 함수
+───────────────────────────────────────────────────────────── */
+
+function 씬_S1() {
+  씬_렌더링({
+    id:'S1', 페이즈:'PHASE 1 / 기(起) — 의심의 시작',
+    배경묘사:'격리 타워 내부 / 깜빡이는 홀로그램 HUD.\n[STATUS: STABLE] → [STATUS: ANOMALY DETECTED]\nGene Scanner 가동. 냉각 팬의 금속음이 복도에 울린다.',
+    판정조건:'Gene Scanner 가동',
+    대사목록:[
+      { 화자클래스:'화자_시스템', 화자명:'SYSTEM',
+        텍스트:'막내동생 유전자 적합도 <span class="강조_녹색">99%.</span> — 이상 신호 감지됨. 데이터 암호화 레이어 충돌.', 지문여부:false },
+      { 화자클래스:'화자_오빠', 화자명:'큰오빠 / ΩK-001',
+        텍스트:'"아니, 이 노이즈는 뭐야? 시스템이 뭔가를 숨기고 있어."', 지문여부:false },
+    ],
+    선택목록:[
+      { 레이블:'A', 색클래스:'색_앰버', 본문:'즉시 보고',
+        효과설명:'Trust_f +20 / Evidence -5 ㅣ 체제 순응, 감시망 안으로 들어간다.',
+        잠금여부:false, 액션:'S1_A' },
+      { 레이블:'B', 색클래스:'색_시안', 본문:'비밀 조사',
+        효과설명:'Evidence +20 / Trust_f -10 ㅣ 독자 행보, 시스템의 눈 밖에 난다.',
+        잠금여부:false, 액션:'S1_B' },
+    ]
+  });
+}
+
+function 씬_S2() {
+  const 로그_해금 = 게임상태.증거 >= 20;
+  씬_렌더링({
+    id:'S2', 페이즈:'PHASE 1 / 기(起) — 폐기 서버 구역',
+    배경묘사:'폐기 서버 구역 / 붉은 냉각수가 하층을 적신다.\n손상된 로그 파편이 바닥에 흩어져 있다.'
+      + (로그_해금
+          ? '\n<span class="강조_녹색">▸ [UNLOCK] Ev ≥ 20 — 은폐된 바이오 로그 복구 가능</span>'
+          : '\n<span class="강조_빨강">▸ [LOCKED] Ev < 20 — 암호화 해제 불가, 데이터 소실</span>'),
+    판정조건:`Ev ${로그_해금?'≥':'<'} 20`,
+    대사목록:[
+      ...(로그_해금 ? [{ 화자클래스:'화자_로그', 화자명:'ENCRYPTED LOG #4471',
+          텍스트:'"나를... 지우지 마... 오빠..."', 지문여부:false }] : []),
+      { 화자클래스:'화자_오빠', 화자명:'큰오빠',
+        텍스트:'"이건 동생의 목소리야. 이미 삭제가 시작됐어."', 지문여부:false },
+      { 화자클래스:'화자_시스템', 화자명:'SYSTEM',
+        텍스트:'데이터 무결성 경고. 외부 접근 감지. 보고 프로토콜 권장.', 지문여부:false },
+    ],
+    선택목록:[
+      { 레이블:'A', 색클래스:'색_빨강', 본문:'심층 데이터 추출',
+        효과설명:'Evidence +20 / Risk +10 ㅣ 증거 확보, 탐지 위험 상승.',
+        잠금여부:false, 액션:'S2_A' },
+      { 레이블:'B', 색클래스:'색_앰버', 본문:'흔적만 확인',
+        효과설명:'Trust_f +10 ㅣ 안전한 행동, 체제 순응 유지.',
+        잠금여부:false, 액션:'S2_B' },
+    ]
+  });
+}
+
+function 씬_S3() {
+  const 고발_가능 = 게임상태.s2선택 === 'A';
+  const 아버지_감시 = 게임상태.신뢰 < 30;
+  씬_렌더링({
+    id:'S3', 페이즈:'PHASE 1 / 기(起) — 가족의 식탁',
+    배경묘사:'가족의 식탁 / 정적이 흐르는 저녁.'
+      + (아버지_감시 ? '\n<span class="강조_빨강">▸ [ALERT] T_f < 30 — 아버지의 감시가 강화됐다.</span>' : ''),
+    판정조건: 아버지_감시 ? 'T_f < 30 → 감시 강화' : null,
+    대사목록:[
+      { 화자클래스:'화자_아버지', 화자명:'아버지',
+        텍스트:'"가족의 수치는 곧 타워의 안녕이다. 딴생각 마라."', 지문여부:false },
+      { 화자클래스:'화자_어머니', 화자명:'어머니',
+        텍스트:'"얘야, 이 주사를 맞고 좀 쉬렴."', 지문여부:false },
+      { 화자클래스:'화자_오빠', 화자명:'큰오빠',
+        텍스트:'"(이걸 그냥 넘길 수는 없어...)"', 지문여부:false },
+    ],
+    선택목록:[
+      { 레이블:'A', 색클래스:'색_앰버', 본문:'주사 수락',
+        효과설명:'Corruption +20 ㅣ 오염 누적, 환각 리스크 발생.',
+        잠금여부:false, 액션:'S3_A' },
+      { 레이블:'B', 색클래스: 고발_가능 ? '색_빨강' : '색_시안',
+        본문: 고발_가능 ? '조사 내용 고발' : '주사 거부 (정신적 무결성 유지)',
+        효과설명: 고발_가능
+          ? 'Evidence +15 / Trust_f -20 ㅣ 위험한 폭로. 체제와 정면충돌.'
+          : 'Evidence +10 ㅣ 조용한 거절. 독자 경로 유지.',
+        잠금여부:false, 액션:'S3_B' },
+    ]
+  });
+}
+
+function 씬_S4() {
+  const 대화_가능 = 게임상태.증거 >= 40;
+  const 경계_강화 = 게임상태.위험 >= 30;
+  씬_렌더링({
+    id:'S4', 페이즈:'PHASE 2 / 전(轉) — 야간 격리 구역',
+    배경묘사:'야간 격리 구역 / 변이된 누이와 조우.\n실시간 유전자 붕괴 연출 — 푸른 균열이 피부를 타고 흐른다.'
+      + (!대화_가능 ? '\n<span class="강조_빨강">▸ [ALERT] Ev < 40 — 데이터 동기화 채널 불안정.</span>' : '')
+      + (경계_강화  ? '\n<span class="강조_앰버">▸ [ALERT] Risk ≥ 30 — 보안 드론 경계 단계 상승.</span>' : '')
+      + (게임상태.루프횟수 > 0 ? `\n<span class="강조_빨강">▸ [LOOP] ${게임상태.루프횟수}회차 반복. 기억이 흐릿해진다.</span>` : ''),
+    판정조건:`Ev ${대화_가능?'≥':'<'} 40 / ${경계_강화?'Risk ≥ 30':'경계 정상'}`,
+    대사목록:[
+      { 화자클래스:'화자_누이', 화자명:'누이',
+        텍스트:'"오빠... 나도 내가 무서워. 시스템이 날 괴물로 만들어."', 지문여부:false },
+      { 화자클래스:'화자_오빠', 화자명:'큰오빠',
+        텍스트:'"내가 끝낼게. 이 지옥 같은 삭제를."', 지문여부:false },
+      ...(게임상태.루프횟수 > 0 ? [{ 화자클래스:'화자_시스템', 화자명:'SYSTEM',
+          텍스트:`반복 루프 감지. ${게임상태.루프횟수}회차. 인지 오류 누적 중.`, 지문여부:false }] : []),
+    ],
+    선택목록:[
+      { 레이블:'A', 색클래스:'색_녹색', 본문:'데이터 동기화 — 누이와 공명',
+        효과설명:'Admin_Key 획득 / Corruption +10 ㅣ 진실의 조각을 수용한다.',
+        잠금여부:false, 액션:'S4_A' },
+      { 레이블:'B', 색클래스:'색_빨강', 본문:'거부 및 도주',
+        효과설명:'Admin_Key = false / Risk +15 ㅣ 추격전 루트로 진입.',
+        잠금여부:false, 액션:'S4_B' },
+    ]
+  });
+}
+
+function 씬_S5() {
+  const 환각_발동 = 게임상태.오염 >= 50;
+  씬_렌더링({
+    id:'S5', 페이즈:'PHASE 2 / 전(轉) — 중앙 복도 추격전',
+    배경묘사:'중앙 복도 / 보안 드론의 레이저망이 촘촘히 채운다.\n괴규화된 누이가 뒤를 쫓는다.'
+      + (환각_발동 ? '\n<span class="강조_빨강">▸ [CRITICAL] Corruption ≥ 50 — 환각 발동. 실제와 로그가 뒤섞인다.</span>' : ''),
+    판정조건: 환각_발동 ? 'Corruption ≥ 50 → 환각' : 'Corruption < 50',
+    대사목록:[
+      { 화자클래스:'화자_시스템', 화자명:'SYSTEM',
+        텍스트:'미확인 변이체 발견. <span class="강조_빨강">즉시 소거 프로토콜 가동.</span>', 지문여부:false },
+      { 화자클래스:'화자_오빠', 화자명:'큰오빠',
+        텍스트:'"여기서 멈출 순 없어... 아직 진실을 못 봤어!"', 지문여부:false },
+      ...(환각_발동 ? [{ 화자클래스:'화자_오빠', 화자명:'큰오빠 (환각)',
+          텍스트:'"이 복도... 이미 본 적이 있어. 아니면 꿈인가?"', 지문여부:true }] : []),
+    ],
+    선택목록:[
+      { 레이블:'A', 색클래스:'색_시안', 본문:'게이트 해킹 성공',
+        효과설명:'Admin_Key 획득 → S6 에어락 진입.',
+        잠금여부:false, 액션:'S5_A' },
+      { 레이블:'B', 색클래스:'색_빨강', 본문:'추격 실패',
+        효과설명:'로그 롤백 발생 → RE_S4 회귀.',
+        잠금여부:false, 액션:'S5_B' },
+    ]
+  });
+}
+
+function 씬_RE_S4() {
+  document.getElementById('롤백_배너').style.display = 'block';
+  씬_렌더링({
+    id:'RE_S4', 페이즈:'ERROR / 로그 롤백 — 반복된 밤',
+    배경묘사:'글리치와 함께 시간이 되감긴다.\n회색조의 반복된 밤. 격리 구역 — 다시.',
+    판정조건:'S5 추격 실패 → 강제 루프',
+    대사목록:[
+      { 화자클래스:'화자_시스템', 화자명:'SYSTEM',
+        텍스트:'치명적 오류. <span class="강조_빨강">세이브 포인트로 로그를 복구합니다.</span>', 지문여부:false },
+      { 화자클래스:'화자_오빠', 화자명:'큰오빠',
+        텍스트:`"이 감각... 벌써 ${게임상태.루프횟수 + 1}번째지? 머리가 깨질 것 같아."`, 지문여부:false },
+    ],
+    선택목록:[
+      { 레이블:'A', 색클래스:'색_시안', 본문:'루프 재시도',
+        효과설명:'S4 야간 격리 구역으로 회귀.',
+        잠금여부:false, 액션:'RE_재시도' },
+      { 레이블:'B', 색클래스:'색_빨강', 본문:'로그 수용 — 포기',
+        효과설명:'데이터 완전 소거. GAME OVER.',
+        잠금여부:false, 액션:'RE_포기' },
+    ]
+  });
+}
+
+function 씬_S6() {
+  /* Admin_Key 없으면 즉시 소거 엔딩 */
+  if (!게임상태.어드민키) {
+    로그추가('에러: ADMIN_KEY 없음 — 에어락 접근 거부. 즉시 소거 집행.', '에러');
+    setTimeout(function() { 엔딩_표시('소거'); }, 800);
+    return;
+  }
+  const 설득_가능 = (게임상태.증거 + 게임상태.신뢰) >= 120;
+  씬_렌더링({
+    id:'S6', 페이즈:'PHASE 3 / 결(結) — 에어락 게이트',
+    배경묘사:'에어락 게이트 / 붉은 태양이 유리 너머로 번진다.\n아버지가 총을 겨눈 채 기다린다.'
+      + (설득_가능
+          ? '\n<span class="강조_녹색">▸ [UNLOCK] Ev + T_f ≥ 120 — 아버지 설득 성공 루트 활성화</span>'
+          : '\n<span class="강조_앰버">▸ [INFO] Ev + T_f < 120 — 설득 불안정. 탈출 루트 권장.</span>'),
+    판정조건:`Ev+T_f = ${게임상태.증거+게임상태.신뢰} ${설득_가능?'≥':'<'} 120`,
+    대사목록:[
+      { 화자클래스:'화자_아버지', 화자명:'아버지',
+        텍스트:'"결국 여기까지 왔구나. 너는 타워를 파괴할 셈이냐?"', 지문여부:false },
+      { 화자클래스:'화자_오빠', 화자명:'큰오빠',
+        텍스트:'"이건 파괴가 아니라, 살아있는 것들의 증명이에요."', 지문여부:false },
+    ],
+    선택목록:[
+      { 레이블:'A', 색클래스:'색_빨강', 본문:'진실 전 대역 송출 — 혁명',
+        효과설명:'Evidence 주도 엔딩 ㅣ 타워 시스템 전면 붕괴.',
+        잠금여부:false, 액션:'END_혁명' },
+      { 레이블:'B', 색클래스:'색_앰버', 본문:'단독 탈출 감행 — 생존',
+        효과설명:'Survival 엔딩 ㅣ 홀로 사막으로.',
+        잠금여부:false, 액션:'END_생존' },
+    ]
+  });
+}
+
+/* ─────────────────────────────────────────────────────────────
+   [8] 씬 이동 디스패처
+───────────────────────────────────────────────────────────── */
+function 씬_이동(씬ID) {
+  const 맵 = { S1:씬_S1, S2:씬_S2, S3:씬_S3, S4:씬_S4, S5:씬_S5, RE_S4:씬_RE_S4, S6:씬_S6 };
+  if (맵[씬ID]) 맵[씬ID]();
+}
+
+/* ─────────────────────────────────────────────────────────────
+   [9] 선택지 처리
+───────────────────────────────────────────────────────────── */
+function 선택_처리(액션) {
+  document.querySelectorAll('.선택지_버튼').forEach(function(b) { b.disabled = true; });
+
+  switch (액션) {
+    case 'S1_A':
+      수치변경({ 신뢰:20, 증거:-5 });
+      로그추가('S1 [A] 즉시 보고. Trust_f +20 / Evidence -5', '경고');
+      setTimeout(function(){ 씬_이동('S2'); }, 440); break;
+
+    case 'S1_B':
+      수치변경({ 증거:20, 신뢰:-10 });
+      로그추가('S1 [B] 비밀 조사 개시. Evidence +20 / Trust_f -10', '일반');
+      setTimeout(function(){ 씬_이동('S2'); }, 440); break;
+
+    case 'S2_A':
+      게임상태.s2선택 = 'A';
+      수치변경({ 증거:20, 위험:10 });
+      로그추가('S2 [A] 심층 데이터 추출. Evidence +20 / Risk +10', '일반');
+      setTimeout(function(){ 씬_이동('S3'); }, 440); break;
+
+    case 'S2_B':
+      게임상태.s2선택 = 'B';
+      수치변경({ 신뢰:10 });
+      로그추가('S2 [B] 흔적만 확인. Trust_f +10', '경고');
+      setTimeout(function(){ 씬_이동('S3'); }, 440); break;
+
+    case 'S3_A':
+      수치변경({ 오염:20 });
+      로그추가('S3 [A] 주사 수락. Corruption +20', '경고');
+      setTimeout(function(){ 씬_이동('S4'); }, 440); break;
+
+    case 'S3_B':
+      if (게임상태.s2선택 === 'A') {
+        수치변경({ 증거:15, 신뢰:-20 });
+        로그추가('S3 [B] 조사 내용 고발. Evidence +15 / Trust_f -20', '에러');
       } else {
-        currentHTML += fullText[i];
-        i++;
+        수치변경({ 증거:10 });
+        로그추가('S3 [B] 주사 거부. Evidence +10', '일반');
       }
-      
-      el.innerHTML = currentHTML + (state.GLITCH>=50&&Math.random()<.04 ? '▓▒░'[Math.floor(Math.random()*3)] : '');
-      scrl.scrollTop = scrl.scrollHeight;
-      typingTimer = setTimeout(tick, 26+(state.GLITCH>60?Math.random()*65:0));
-    } else {
-      finishTyping();
-    }
-  })();
-}
-function finishTyping(){
-  isTyping=false; clearTimeout(typingTimer);
-  document.getElementById('dialog-text').innerHTML=fullText;
-  document.getElementById('cursor').style.display='none';
-  document.getElementById('skip-hint').style.display='none';
-  document.getElementById('cont-hint').style.display='block';
-  document.getElementById('btn-skip').disabled=true;
-  if(onTypeDone) onTypeDone();
-}
-function skipTyping(){ if(!isTyping)return; clearTimeout(typingTimer); finishTyping(); }
+      setTimeout(function(){ 씬_이동('S4'); }, 440); break;
 
-/* ── HUD ── */
-const clamp=(v,a,b)=>Math.min(Math.max(v,a),b);
-function updateHUD(ch={}){
-  setBar('fill-sync', 'num-sync',  clamp(state.WARM,  0,100), state.WARM);
-  setBar('fill-integ','num-integ', clamp(state.COLD,  0,100), state.COLD);
-  setBar('fill-noise','num-noise', clamp(state.GLITCH,0,100), state.GLITCH);
-  if(ch.WARM)   pulseEl('fill-sync',  'num-sync');
-  if(ch.COLD)   pulseEl('fill-integ', 'num-integ');
-  if(ch.GLITCH) pulseEl('fill-noise', 'num-noise');
-  const bc=document.body.classList;
-  bc.remove('noise-high','noise-danger');
-  if(state.GLITCH>=80) bc.add('noise-danger','noise-high');
-  else if(state.GLITCH>=50) bc.add('noise-high');
-  const adm=document.getElementById('adm-val');
-  if(state.flags.WITCH_CORE){ adm.textContent='TRUE'; adm.className='adm-on'; bc.add('core-active'); }
-  else { adm.textContent='FALSE'; adm.className=''; bc.remove('core-active'); }
-}
-function setBar(fId,nId,pct,val){ document.getElementById(fId).style.width=pct+'%'; document.getElementById(nId).textContent=val; }
-function pulseEl(fId,nId){
-  [fId,nId].forEach(id=>{
-    const el=document.getElementById(id);
-    el.classList.remove('pulsing'); void el.offsetWidth; el.classList.add('pulsing');
-    setTimeout(()=>el.classList.remove('pulsing'),600);
-  });
-}
+    case 'S4_A':
+      수치변경({ 어드민키:true, 오염:10 });
+      로그추가('S4 [A] 데이터 동기화 성공. ADMIN_KEY 획득.', '성공');
+      setTimeout(function(){ 씬_이동('S6'); }, 440); break;
 
-/* ── 효과 적용 ── */
-function applyEffects(eff={},flags={}){
-  const ch={};
-  if(eff.WARM   !==undefined){state.WARM  =clamp(state.WARM  +eff.WARM,  0,100);ch.WARM=1;}
-  if(eff.COLD   !==undefined){state.COLD  =clamp(state.COLD  +eff.COLD,  0,100);ch.COLD=1;}
-  if(eff.GLITCH !==undefined){state.GLITCH=clamp(state.GLITCH+eff.GLITCH,0,100);ch.GLITCH=1;}
-  Object.assign(state.flags,flags);
-  updateHUD(ch);
-}
+    case 'S4_B':
+      수치변경({ 어드민키:false, 위험:15 });
+      로그추가('S4 [B] 거부 및 도주. Risk +15.', '에러');
+      setTimeout(function(){ 씬_이동('S5'); }, 440); break;
 
-/* ── 씬 렌더링 ── */
-function renderScene(sceneId){
-  const sc=sceneData[sceneId];
-  if(!sc){console.error('씬 없음:',sceneId);return;}
-  state.currentScene=sceneId;
-  sceneHistory.push({sceneId,snap:snap()});
-  document.getElementById('btn-back').disabled=sceneHistory.length<2;
+    case 'S5_A':
+      수치변경({ 어드민키:true });
+      로그추가('S5 [A] 게이트 해킹 성공. ADMIN_KEY 획득.', '성공');
+      setTimeout(function(){ 씬_이동('S6'); }, 440); break;
 
-  applyBg(sc);
-  startTimer();
+    case 'S5_B':
+      로그추가('S5 [B] 추격 실패. 로그 롤백 발생.', '에러');
+      setTimeout(function(){ 씬_이동('RE_S4'); }, 440); break;
 
-  document.getElementById('scene-title').textContent=sc.title||'';
-  document.getElementById('scene-tag').textContent  =sc.tag  ||'';
-  document.getElementById('ui-narr').textContent    =sc.narr ||'';
+    case 'RE_재시도':
+      게임상태.루프횟수++;
+      로그추가(`RE_S4 [A] 루프 재시도 (${게임상태.루프횟수}회차). S4 회귀.`, '경고');
+      setTimeout(function(){ 씬_이동('S4'); }, 440); break;
 
-  const cn=document.getElementById('char-name');
-  if(sc.char){ cn.textContent=sc.char+'  :'; cn.className='cn-'+(sc.charType||'normal'); }
-  else { cn.textContent='[ NARRATION ]'; cn.className='cn-dim'; }
+    case 'RE_포기':
+      로그추가('RE_S4 [B] 로그 수용. 소거 진행 중...', '에러');
+      setTimeout(function(){ 엔딩_표시('소거'); }, 700); break;
 
-  document.getElementById('choices-wrap').innerHTML='';
+    case 'END_혁명':
+      로그추가('S6 [A] 진실 전 대역 송출. 혁명가 엔딩.', '성공');
+      setTimeout(function(){ 엔딩_표시('혁명'); }, 700); break;
 
-  const raw=typeof sc.text==='function'?sc.text(state):sc.text;
-  startTyping(raw,()=>{
-    if(sc.ending&&(!sc.choices||sc.choices.length===0)){
-      setTimeout(()=>showEndingScreen(sc),1500); return;
-    }
-    if(sc.choices&&sc.choices.length>0) renderChoices(sc.choices,sc);
-  });
-}
-
-/* ── 선택지 카드 ── */
-function buildPills(c,ok){
-  if(!ok) return '';
-  const eff=c.effects||{};
-  let h='';
-  if(eff.WARM)                   h+=`<span class="eff-pill ep-warm">SYNC ${eff.WARM>0?'+':''}${eff.WARM}</span>`;
-  if(eff.COLD)                   h+=`<span class="eff-pill ep-cold">INTEG ${eff.COLD>0?'+':''}${eff.COLD}</span>`;
-  if(eff.GLITCH!=null&&eff.GLITCH!==0){
-    h+=eff.GLITCH>0?`<span class="eff-pill ep-dark">NOISE +${eff.GLITCH}</span>`
-                   :`<span class="eff-pill ep-heal">NOISE ${eff.GLITCH}</span>`;
+    case 'END_생존':
+      로그추가('S6 [B] 단독 탈출 감행. 생존자 엔딩.', '경고');
+      setTimeout(function(){ 엔딩_표시('생존'); }, 700); break;
   }
-  if(c.flags){
-    if(c.flags.WITCH_CORE)       h+=`<span class="eff-pill ep-flag">CORE획득</span>`;
-    if(c.flags.scarecrow_friend) h+=`<span class="eff-pill ep-heal">우정+</span>`;
-    if(c.flags.tin_friend)       h+=`<span class="eff-pill ep-heal">공감링크</span>`;
-    if(c.flags.lion_friend)      h+=`<span class="eff-pill ep-heal">용기+</span>`;
-    if(c.flags.from_alt)         h+=`<span class="eff-pill ep-heal">복귀</span>`;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   [10] 엔딩 화면
+───────────────────────────────────────────────────────────── */
+function 엔딩_표시(유형) {
+  const 최종점수 = 게임상태.증거 + 게임상태.신뢰 - 게임상태.오염;
+
+  const 데이터 = {
+    혁명: {
+      클래스:'혁명가', 분류:'ENDING A / EVIDENCE DOMINANT — 혁명가 (TRUE END)',
+      제목:'혁명가', 부제:'REVOLUTIONARY — TRUE END', 부제색:'var(--색_빨강)',
+      본문:'타워의 모든 스크린에 누이의 로그가 출력된다.<br>계급 체계가 무너지고 시스템은 정지한다.<br>유전자 낙인이 사라진 세계가, 잠시 숨을 멈춘다.',
+      선색:'var(--색_빨강)',
+    },
+    생존: {
+      클래스:'생존자', 분류:'ENDING B / SURVIVAL DOMINANT — 생존자 (NEUTRAL END)',
+      제목:'생존자', 부제:'SURVIVOR — NEUTRAL END', 부제색:'var(--색_앰버)',
+      본문:'홀로 붉은 사막으로 걸어 나간다.<br>등 뒤의 타워는 여전히 차갑고 고요하게 작동 중이다.<br>진실은 가슴 속에만 남겨진 채, 두 발은 앞으로.',
+      선색:'var(--색_앰버)',
+    },
+    소거: {
+      클래스:'소거됨', 분류:'GAME OVER / LOG DELETED',
+      제목:'LOG DELETED', 부제:'SYSTEM PURGE COMPLETE', 부제색:'#4a6a7a',
+      본문:'[LOG DELETED]<br>큰오빠의 데이터가 타워에서 완전히 세척되었다.<br>다시는 의심이 싹트지 않으리라.',
+      선색:'#4a6a7a',
+    },
+  };
+
+  const 엔딩 = 데이터[유형];
+
+  let 판정 = '';
+  if (유형 !== '소거') {
+    if (최종점수 >= 80) 판정 = '▸ VERDICT: 진실은 완전히 밝혀졌다.';
+    else if (최종점수 >= 40) 판정 = '▸ VERDICT: 진실의 절반만이 세상에 남았다.';
+    else 판정 = '▸ VERDICT: 진실은 여전히 어둠 속에 있다.';
   }
-  return h;
+
+  document.getElementById('본문').style.display = 'none';
+
+  const 화면 = document.getElementById('엔딩_화면');
+  화면.style.opacity = '0';
+  화면.style.transition = 'opacity 0.8s ease';
+  화면.classList.add('보임');
+
+  document.getElementById('엔딩_내부_컨텐츠').innerHTML = `
+    <div class="엔딩_제목 ${엔딩.클래스}">${엔딩.제목}</div>
+    <div class="엔딩_부제" style="color:${엔딩.부제색}">${엔딩.부제}</div>
+    <div class="엔딩_구분선" style="background:${엔딩.선색}"></div>
+    <div class="엔딩_본문">${엔딩.본문}</div>
+    <div class="엔딩_수치_요약">
+      <div class="요약_항목"><span class="요약_라벨">EVIDENCE</span>
+        <span class="요약_값" style="color:var(--색_시안)">${게임상태.증거}</span></div>
+      <div class="요약_항목"><span class="요약_라벨">TRUST_F</span>
+        <span class="요약_값" style="color:var(--색_앰버)">${게임상태.신뢰}</span></div>
+      <div class="요약_항목"><span class="요약_라벨">CORRUPTION</span>
+        <span class="요약_값" style="color:var(--색_빨강)">${게임상태.오염}</span></div>
+      <div class="요약_항목"><span class="요약_라벨">RISK</span>
+        <span class="요약_값" style="color:var(--색_보라)">${게임상태.위험}</span></div>
+      <div class="요약_항목"><span class="요약_라벨">FINAL SCORE</span>
+        <span class="요약_값" style="color:var(--색_텍스트)">${최종점수}</span></div>
+      <div class="요약_항목"><span class="요약_라벨">LOOPS</span>
+        <span class="요약_값" style="color:var(--색_음소거)">${게임상태.루프횟수}</span></div>
+    </div>
+    <div class="엔딩_판정_설명">${판정}</div>
+    <div class="FIN_태그">— FIN —</div>
+    <button class="재시작_버튼" onclick="게임_재시작()">RESTART</button>`;
+
+  setTimeout(function(){ 화면.style.opacity = '1'; }, 50);
 }
 
-function renderChoices(choices,sc){
-  const wrap=document.getElementById('choices-wrap');
-  wrap.innerHTML='';
-  wrap.className=choices.length===1?'single':'';
-  let allDisabled=true;
-  choices.forEach((c,i)=>{
-    const ok=c.condition?c.condition(state):true;
-    if(ok) allDisabled=false;
-    const card=document.createElement('div');
-    card.className=`choice-card type-${c.type||'neutral'}${!ok?' disabled':''}`;
-    const L=String.fromCharCode(65+i);
-    const pills=buildPills(c,ok);
-    if(!ok){
-      card.innerHTML=`<div class="c-badge" style="background:rgba(80,80,76,.4);color:var(--txt-dim)">⊗</div><div class="c-title" style="color:var(--txt-dim);font-size:11px;">${c.disabledText||c.text.replace('\n',' ')}</div>`;
-    } else {
-      card.innerHTML=`<div class="c-badge">${L}</div><div class="c-title">${c.text.replace('\n','<br>')}</div>${pills?`<div class="c-effects">${pills}</div>`:''}`;
-      card.addEventListener('click',()=>onChoiceClick(c));
+/* ─────────────────────────────────────────────────────────────
+   [11] 게임 재시작
+───────────────────────────────────────────────────────────── */
+function 게임_재시작() {
+  게임상태 = { 증거:0, 신뢰:0, 오염:0, 위험:0, 어드민키:false, s2선택:null, 루프횟수:0 };
+  수치_UI_전체갱신();
+  const 화면 = document.getElementById('엔딩_화면');
+  화면.classList.remove('보임');
+  화면.style.opacity = '';
+  document.getElementById('본문').style.display = 'flex';
+  document.getElementById('로그_내용').innerHTML = '';
+  로그_카운터 = 0;
+  로그추가('시스템 재초기화. 검증관 ID: ΩK-001 재접속.', '일반');
+  씬_이동('S1');
+}
+
+/* ═══════════════════════════════════════════════
+   [NEW] 타이핑 애니메이션 엔진
+═══════════════════════════════════════════════ */
+function 타이핑_애니메이션(el, html문자열, 속도) {
+  속도 = 속도 || 28;
+  /* HTML 태그를 제거한 순수 텍스트와 HTML 구분 */
+  const 임시 = document.createElement('div');
+  임시.innerHTML = html문자열;
+  const 순수텍스트 = 임시.textContent;
+  const HTML있음 = html문자열 !== 순수텍스트;
+
+  if (HTML있음) {
+    /* HTML 포함 시 단어 단위로 빠르게 */
+    el.innerHTML = '';
+    el.classList.add('타이핑_텍스트');
+    const 단어들 = html문자열.split(/(?<=>\s*)|(?=\s*<)/);
+    let i = 0;
+    function 다음단어() {
+      if (i >= 단어들.length) {
+        el.classList.remove('타이핑_텍스트');
+        el.classList.add('타이핑_완료');
+        return;
+      }
+      el.innerHTML += 단어들[i++];
+      setTimeout(다음단어, 속도 * 1.5);
     }
-    wrap.appendChild(card);
+    다음단어();
+  } else {
+    /* 순수 텍스트 — 글자 단위 타이핑 */
+    el.textContent = '';
+    el.classList.add('타이핑_텍스트');
+    let i = 0;
+    function 다음글자() {
+      if (i >= 순수텍스트.length) {
+        el.classList.remove('타이핑_텍스트');
+        el.classList.add('타이핑_완료');
+        return;
+      }
+      el.textContent += 순수텍스트[i++];
+      setTimeout(다음글자, 속도 + Math.random() * 18);
+    }
+    다음글자();
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   [NEW] 동적 배경 파티클 시스템
+═══════════════════════════════════════════════ */
+(function() {
+  const cv = document.getElementById('파티클_캔버스');
+  const ctx = cv.getContext('2d');
+  const 파티클들 = [];
+  const 파티클수 = 55;
+
+  function 리사이즈() {
+    cv.width = window.innerWidth;
+    cv.height = window.innerHeight;
+  }
+  window.addEventListener('resize', 리사이즈);
+  리사이즈();
+
+  const 색상들 = ['0,229,255','255,45,74','255,179,0','0,255,136','204,68,255'];
+
+  for (let i = 0; i < 파티클수; i++) {
+    파티클들.push({
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight,
+      vx: (Math.random() - 0.5) * 0.35,
+      vy: (Math.random() - 0.5) * 0.35 - 0.1,
+      r: Math.random() * 1.5 + 0.3,
+      색: 색상들[Math.floor(Math.random() * 색상들.length)],
+      알파: Math.random() * 0.5 + 0.15,
+      반짝임: Math.random() * Math.PI * 2,
+      반짝임속도: Math.random() * 0.02 + 0.005,
+      연결거리: Math.random() * 80 + 40,
+    });
+  }
+
+  function 루프() {
+    ctx.clearRect(0, 0, cv.width, cv.height);
+
+    파티클들.forEach(function(p, i) {
+      p.x += p.vx; p.y += p.vy;
+      p.반짝임 += p.반짝임속도;
+      const 현재알파 = p.알파 * (0.6 + 0.4 * Math.sin(p.반짝임));
+
+      if (p.x < 0) p.x = cv.width;
+      if (p.x > cv.width) p.x = 0;
+      if (p.y < 0) p.y = cv.height;
+      if (p.y > cv.height) p.y = 0;
+
+      /* 파티클 그리기 */
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${p.색},${현재알파})`;
+      ctx.fill();
+
+      /* 가까운 파티클끼리 선 연결 */
+      for (let j = i + 1; j < 파티클들.length; j++) {
+        const q = 파티클들[j];
+        const dx = p.x - q.x, dy = p.y - q.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < p.연결거리) {
+          const 선알파 = (1 - dist / p.연결거리) * 0.12;
+          ctx.beginPath();
+          ctx.moveTo(p.x, p.y);
+          ctx.lineTo(q.x, q.y);
+          ctx.strokeStyle = `rgba(${p.색},${선알파})`;
+          ctx.lineWidth = 0.4;
+          ctx.stroke();
+        }
+      }
+    });
+
+    requestAnimationFrame(루프);
+  }
+  루프();
+})();
+
+/* ═══════════════════════════════════════════════
+   [NEW] 실시간 노이즈 오버레이
+═══════════════════════════════════════════════ */
+(function() {
+  const cv = document.getElementById('노이즈_캔버스');
+  const ctx = cv.getContext('2d');
+
+  function 리사이즈() {
+    cv.width = window.innerWidth;
+    cv.height = window.innerHeight;
+  }
+  window.addEventListener('resize', 리사이즈);
+  리사이즈();
+
+  let 프레임 = 0;
+  function 노이즈_루프() {
+    프레임++;
+    if (프레임 % 3 === 0) { /* 초당 약 20프레임만 갱신 (성능) */
+      const w = cv.width, h = cv.height;
+      const id = ctx.createImageData(w, h);
+      const data = id.data;
+      for (let i = 0; i < data.length; i += 4) {
+        const v = Math.random() * 255 | 0;
+        data[i] = v; data[i+1] = v; data[i+2] = v;
+        data[i+3] = Math.random() * 18 | 0;
+      }
+      ctx.putImageData(id, 0, 0);
+    }
+    requestAnimationFrame(노이즈_루프);
+  }
+  노이즈_루프();
+})();
+
+/* ═══════════════════════════════════════════════
+   [NEW] 스모그 레이어 생성
+═══════════════════════════════════════════════ */
+(function() {
+  const 컨테이너 = document.getElementById('스모그_레이어');
+  const 설정들 = [
+    { w:600, h:400, x:10,  y:20,  dx:80,  dy:-50, dur:18, delay:0,   색:'0,229,255',   최대불투명:0.055 },
+    { w:500, h:350, x:50,  y:55,  dx:-60, dy:-30, dur:22, delay:5,   색:'255,45,74',   최대불투명:0.04  },
+    { w:700, h:500, x:20,  y:30,  dx:40,  dy:-80, dur:27, delay:9,   색:'0,60,90',     최대불투명:0.07  },
+    { w:450, h:300, x:60,  y:10,  dx:-80, dy:40,  dur:20, delay:3,   색:'204,68,255',  최대불투명:0.035 },
+    { w:800, h:600, x:5,   y:70,  dx:60,  dy:-40, dur:32, delay:14,  색:'0,30,50',     최대불투명:0.08  },
+    { w:380, h:280, x:75,  y:40,  dx:-40, dy:-60, dur:15, delay:7,   색:'255,179,0',   최대불투명:0.025 },
+  ];
+
+  설정들.forEach(function(s) {
+    const el = document.createElement('div');
+    el.className = '스모그_클라우드';
+    el.style.cssText = `
+      width:${s.w}px; height:${s.h}px;
+      left:${s.x}%; top:${s.y}%;
+      background: radial-gradient(ellipse, rgba(${s.색},0.4) 0%, transparent 70%);
+      --스모그_dx: ${s.dx}px;
+      --스모그_dy: ${s.dy}px;
+      --스모그_최대_불투명: ${s.최대불투명};
+      animation-duration: ${s.dur}s;
+      animation-delay: ${s.delay}s;
+    `;
+    컨테이너.appendChild(el);
   });
-  choices.forEach(c=>{ if(c.next) prefetchImg(sceneData[c.next]); });
-  
-  if(allDisabled&&sc.tag&&sc.tag.includes('PHASE 3'))
-    setTimeout(()=>transitionTo('BAD_END'),2200);
+})();
+
+/* ═══════════════════════════════════════════════
+   [NEW] RGB 글리치 슬라이스 생성
+═══════════════════════════════════════════════ */
+(function() {
+  const 컨테이너 = document.getElementById('글리치_오버레이');
+  const 슬라이스_설정 = [
+    { top:15, h:2,  오프셋:-12, 색:'rgba(255,0,80,0.2)',   주기:3.7, 딜레이:0   },
+    { top:35, h:4,  오프셋:8,   색:'rgba(0,229,255,0.18)', 주기:5.1, 딜레이:1.2 },
+    { top:58, h:2,  오프셋:-6,  색:'rgba(255,0,80,0.15)',  주기:4.3, 딜레이:0.7 },
+    { top:72, h:6,  오프셋:14,  색:'rgba(0,229,255,0.12)', 주기:6.8, 딜레이:2.5 },
+    { top:25, h:1,  오프셋:-18, 색:'rgba(255,179,0,0.2)',  주기:2.9, 딜레이:0.4 },
+    { top:88, h:3,  오프셋:10,  색:'rgba(204,68,255,0.15)',주기:7.2, 딜레이:3.1 },
+    { top:45, h:8,  오프셋:-5,  색:'rgba(255,0,80,0.1)',   주기:9.0, 딜레이:1.8 },
+    { top:63, h:1,  오프셋:20,  색:'rgba(0,229,255,0.25)', 주기:4.6, 딜레이:0.9 },
+  ];
+
+  슬라이스_설정.forEach(function(s) {
+    const el = document.createElement('div');
+    el.className = '글리치_슬라이스';
+    el.style.cssText = `
+      top:${s.top}%;
+      --슬라이스_높이: ${s.h}px;
+      --슬라이스_색: ${s.색};
+      --슬라이스_오프셋: ${s.오프셋}px;
+      --슬라이스_주기: ${s.주기}s;
+      --슬라이스_딜레이: ${s.딜레이}s;
+    `;
+    컨테이너.appendChild(el);
+  });
+})();
+
+/* ═══════════════════════════════════════════════
+   [NEW] 시작화면 닫기
+═══════════════════════════════════════════════ */
+function 시작화면_닫기() {
+  const 시작 = document.getElementById('시작_화면');
+  시작.classList.add('페이드아웃');
+  setTimeout(function() {
+    시작.style.display = 'none';
+  }, 1300);
 }
 
-/* ── 이벤트 ── */
-function onChoiceClick(c){
-  document.querySelectorAll('.choice-card').forEach(el=>el.style.pointerEvents='none');
-  document.body.classList.add('shaking');
-  setTimeout(()=>document.body.classList.remove('shaking'),380);
-  applyEffects(c.effects||{},c.flags||{});
-  if(c.action){setTimeout(c.action,350);return;}
-  if(c.next)  setTimeout(()=>transitionTo(c.next),320);
-}
-function onDialogClick(){ if(isTyping) skipTyping(); }
-function onSkipClick()  { if(isTyping) skipTyping(); }
-function goBack(){
-  if(sceneHistory.length<2) return;
-  sceneHistory.pop();
-  const prev=sceneHistory.pop();
-  Object.assign(state,{WARM:prev.snap.WARM,COLD:prev.snap.COLD,GLITCH:prev.snap.GLITCH,flags:{...prev.snap.flags}});
-  updateHUD(); transitionTo(prev.sceneId);
-}
-document.addEventListener('keydown',e=>{
-  if((e.code==='Space'||e.code==='Enter')&&isTyping){e.preventDefault();skipTyping();}
-});
-
-/* ── 씬 전환 ── */
-function transitionTo(id){
-  document.body.classList.add('transitioning');
-  const ns=sceneData[id]; if(ns) prefetchImg(ns);
-  setTimeout(()=>{document.body.classList.remove('transitioning');renderScene(id);},480);
-}
-
-/* ── 엔딩 ── */
-function showEndingScreen(sc){
-  stopTimer();
-  const e=sc.ending;
-  document.getElementById('end-label').textContent =e.label;
-  document.getElementById('end-title').textContent =e.title;
-  document.getElementById('end-title').style.color =e.color;
-  document.getElementById('end-title').style.textShadow=`0 0 30px ${e.color}`;
-  
-  document.getElementById('end-summary').innerHTML=typeof sc.text==='function'?sc.text(state):sc.text;
-  
-  const route=state.WARM>state.COLD?'WARM — 연대':'COLD — 냉철';
-  document.getElementById('end-stats').textContent=
-    `SYNC: ${state.WARM}  /  INTEG: ${state.COLD}  /  NOISE: ${state.GLITCH}\n`+
-    `ADMIN_KEY: ${state.flags.WITCH_CORE?'TRUE ⚠':'FALSE'}  /  ROUTE: ${route}  /  ENDING: ${e.type}`;
-  document.getElementById('ending').classList.add('active');
-}
-
-/* ── 재시작 ── */
-function restartGame(){
-  state.currentScene='S1'; state.WARM=0; state.COLD=0; state.GLITCH=0;
-  state.flags={scarecrow_friend:false,tin_friend:false,lion_friend:false,from_alt:false,WITCH_CORE:false};
-  sceneHistory.length=0;
-  document.getElementById('ending').classList.remove('active');
-  document.body.classList.remove('noise-high','noise-danger','core-active','timer-warn');
-  updateHUD(); transitionTo('S1');
-}
-
-/* ── 바코드 장식 ── */
-function buildBarcodes(){
-  const p=['▌▌▌ ▌▌ ▌▌▌▌ ▌ ▌▌','▌ ▌▌▌▌ ▌▌ ▌ ▌▌▌','▌▌ ▌ ▌▌▌ ▌▌▌▌ ▌'];
-  const code=p.map(x=>x+' '+(Math.random()*9e5|0).toString(16).toUpperCase()).join('\n');
-  ['bc-tl','bc-bl'].forEach(id=>document.getElementById(id).textContent=code);
-}
-
-/* ── 부팅 시퀀스 ── */
-const bootLines=[
-  '> SYS_BOOT: NEO-DOROTHY 2099 v1.0 초기화 중...',
-  '> MEM_ALLOC: 2,099MB / 캔자스 노드 연결 시도',
-  '> [경고] 데이터 토네이도 감지됨 — 강도 CRITICAL',
-  '> WITCH_SCAN: W.I.T.C.H v3.7 바이러스 확인됨',
-  '> ALLY_PING: 허수아비 ✗  양철꾼 ✗  사자 ✗',
-  '> SYNC_MODULE: 동기화 프로토콜 대기 중...',
-  '> 준비 완료. 부팅 허가를 기다리는 중...'
-];
-function runBootLog(){
-  const log=document.getElementById('boot-log'); let i=0;
-  (function next(){ if(i<bootLines.length){ log.textContent+=(i>0?'\n':'')+bootLines[i++]; setTimeout(next,265); } })();
-}
-function bootGame(){
-  const ts=document.getElementById('title-screen');
-  ts.style.transition='opacity .9s ease'; ts.style.opacity='0'; ts.style.pointerEvents='none';
-  setTimeout(()=>{ ts.style.display='none'; updateHUD(); buildBarcodes(); renderScene('S1'); },900);
-}
-
-/* ── 초기 실행 ── */
-window.addEventListener('load',()=>{
-  updateHUD(); buildBarcodes(); runBootLog();
-  document.getElementById('btn-back').disabled=true;
-  document.getElementById('btn-skip').disabled=true;
-});
+/* ═══════════════════════════════════════════════
+   [12] 게임 진입점
+═══════════════════════════════════════════════ */
+씬_이동('S1');
 </script>
 </body>
 </html>
