@@ -1306,7 +1306,7 @@ function 씬_렌더링(설정) {
 
   const 이미지_HTML = `
     <div class="씬_이미지_래퍼" id="이미지래퍼_${설정.id}" data-scene="${설정.id}">
-      ${영상있음 ? '<video class="씬_비디오_엘리먼트" muted playsinline loop></video>' : 미디어_내용}
+      ${영상있음 ? '<video class="씬_비디오_엘리먼트" playsinline loop></video>' : 미디어_내용}
       <label class="씬_이미지_업로드_버튼">
         ⬆ 이미지 업로드
         <input type="file" accept="image/*" onchange="이미지_업로드('${설정.id}', this)">
@@ -1762,7 +1762,7 @@ function 엔딩_표시(유형) {
 
   /* 엔딩 영상 Blob URL 주입 */
   const 비디오래퍼 = document.getElementById('엔딩_비디오_래퍼');
-  비디오래퍼.innerHTML = '<video class="엔딩_영상" muted playsinline loop style="width:100%;height:100%;object-fit:contain;display:block;background:#000"></video>';
+  비디오래퍼.innerHTML = '<video class="엔딩_영상" playsinline loop style="width:100%;height:100%;object-fit:contain;display:block;background:#000"></video>';
   setTimeout(function() {
     const url = 엔딩_영상_경로[유형] || null;
     const v = 비디오래퍼.querySelector('video');
