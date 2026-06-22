@@ -45,7 +45,7 @@ html, body {
   background: var(--색_배경);
   color: var(--색_텍스트);
   font-family: var(--폰트_본문);
-  overflow: hidden;
+  overflow-x: hidden;
 }
 
 /* 전체 스캔라인 */
@@ -293,9 +293,9 @@ body::before {
 /* ─── 조건 알림 바 ─── */
 #조건_알림_바 {
   display: none;
-  padding: 5px 20px;
+  padding: 7px 28px;
   font-family: var(--폰트_모노);
-  font-size: 10px;
+  font-size: 10.5px;
   letter-spacing: 0.8px;
   border-bottom: 1px solid var(--색_앰버_dim);
   background: rgba(255,179,0,0.05);
@@ -307,7 +307,7 @@ body::before {
 /* ─── 롤백 배너 ─── */
 #롤백_배너 {
   display: none;
-  padding: 6px 20px;
+  padding: 9px 28px;
   font-family: var(--폰트_모노);
   font-size: 11px;
   color: var(--색_빨강);
@@ -318,60 +318,58 @@ body::before {
   flex-shrink: 0;
 }
 
-/* ─── 씬 이미지 스테이지 (중앙 메인) ─── */
-#씬_스테이지 {
+/* ─── 씬 패널 — 나머지 공간 전부 사용 ─── */
+#씬_패널 {
   flex: 1;
-  position: relative;
-  background: #050c14;
-  overflow: hidden;
   display: flex;
-  justify-content: center;
-  align-items: center;
+  flex-direction: column;
+  overflow: hidden;
   min-height: 0;
+  animation: 씬_등장 0.28s ease;
+  transform-origin: top;
 }
 
-#씬_스테이지 .씬_이미지_래퍼 {
+/* ── 씬 이미지 슬롯 ── */
+.씬_이미지_래퍼 {
+  position: relative;
+  width: 100%;
+  /* 상단 영상 영역: 뷰포트의 42% 높이 */
+  height: 42vh;
+  flex-shrink: 0;
+  overflow: hidden;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 래퍼 안 콘텐츠 전부 absolute로 꽉 채움 */
+.씬_이미지_래퍼 > * {
   position: absolute;
-  inset: 0;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+}
+
+.씬_이미지_래퍼 img {
   width: 100%;
   height: 100%;
-}
-
-#씬_스테이지 .씬_이미지_래퍼 img {
-  width: 100%; height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   display: block;
-  opacity: 0;
-  transition: opacity 0.7s ease;
-  filter: brightness(0.65) contrast(1.15);
-}
-#씬_스테이지 .씬_이미지_래퍼 img.로딩완료 { opacity: 1; }
-
-/* 스테이지 스캔라인 */
-#씬_스테이지::after {
-  content: '';
-  position: absolute; inset: 0;
-  background: repeating-linear-gradient(
-    0deg, transparent, transparent 3px,
-    rgba(0,0,0,0.12) 3px, rgba(0,0,0,0.12) 4px
-  );
-  pointer-events: none;
-  z-index: 2;
+  background: #000;
 }
 
-/* 스테이지 하단 페이드 */
-#씬_스테이지::before {
-  content: '';
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
-  height: 120px;
-  background: linear-gradient(to bottom, transparent, #050505);
-  pointer-events: none;
-  z-index: 3;
+/* 씬 영상 엘리먼트 — 잘림 없이 전체 표시 */
+.씬_비디오_엘리먼트 {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  background: #000;
 }
 
-/* 플레이스홀더 (이미지 없을 때) */
-.스테이지_플레이스홀더 {
+/* 플레이스홀더 */
+.씬_이미지_플레이스홀더 {
+  width: 100%; height: 100%;
   position: absolute; inset: 0;
   display: flex;
   flex-direction: column;
@@ -381,97 +379,85 @@ body::before {
   background:
     repeating-linear-gradient(
       45deg, transparent, transparent 22px,
-      rgba(0,229,255,0.015) 22px, rgba(0,229,255,0.015) 23px
+      rgba(0,229,255,0.018) 22px, rgba(0,229,255,0.018) 23px
     ),
     linear-gradient(180deg, #020c14 0%, #030f1e 100%);
 }
-.스테이지_플레이스홀더::before {
+.씬_이미지_플레이스홀더::before {
   content: '';
   position: absolute; inset: 0;
-  background: radial-gradient(ellipse at 50% 60%, rgba(0,110,160,0.12) 0%, transparent 70%);
+  background: radial-gradient(ellipse at 50% 65%, rgba(0,110,160,0.14) 0%, transparent 70%);
 }
-.플레이스홀더_씬ID_대 {
+
+.플레이스홀더_씬ID {
   font-family: var(--폰트_UI);
-  font-size: clamp(48px, 7vw, 90px);
+  font-size: clamp(32px, 5vw, 60px);
   font-weight: 900;
-  color: rgba(0,229,255,0.06);
-  letter-spacing: 14px;
+  color: rgba(0,229,255,0.08);
+  letter-spacing: 10px;
   position: relative;
 }
-.플레이스홀더_배경명_대 {
+.플레이스홀더_배경명 {
   font-family: var(--폰트_모노);
-  font-size: clamp(10px, 1.4vw, 14px);
-  color: rgba(0,229,255,0.18);
-  letter-spacing: 5px;
+  font-size: clamp(9px, 1.2vw, 11px);
+  color: rgba(0,229,255,0.22);
+  letter-spacing: 4px;
   text-transform: uppercase;
   position: relative;
 }
-
-/* 이미지 업로드 버튼 */
-.씬_이미지_업로드_버튼 {
-  position: absolute;
-  top: 12px; right: 12px;
-  z-index: 10;
-  display: flex; align-items: center; gap: 6px;
+.플레이스홀더_힌트 {
   font-family: var(--폰트_모노);
-  font-size: 10px;
-  color: rgba(0,229,255,0.45);
-  background: rgba(2,5,8,0.78);
-  border: 1px solid rgba(0,229,255,0.18);
-  padding: 5px 11px;
-  cursor: pointer;
-  letter-spacing: 1px;
-  opacity: 0;
-  transition: opacity 0.2s, color 0.2s, border-color 0.2s;
-}
-#씬_스테이지:hover .씬_이미지_업로드_버튼 { opacity: 1; }
-.씬_이미지_업로드_버튼:hover { color: var(--색_시안); border-color: var(--색_시안); }
-.씬_이미지_업로드_버튼 input[type=file] {
-  position: absolute; inset: 0;
-  opacity: 0; cursor: pointer; width: 100%; height: 100%;
-}
-
-/* ─── 하단 대시보드 (3단 그리드) ─── */
-#씬_대시보드 {
-  height: 290px;
-  flex-shrink: 0;
-  background: #050505;
-  border-top: 1px solid rgba(255,255,255,0.1);
-  display: grid;
-  grid-template-columns: 1fr 2.2fr 1.6fr;
-  gap: 0;
+  font-size: 9px;
+  color: rgba(100,160,180,0.18);
+  letter-spacing: 3px;
   position: relative;
-  z-index: 5;
 }
 
-/* 컬럼 공통 */
-.대시_컬럼 {
-  padding: 16px 20px;
+/* 스캔라인 위에 */
+.씬_이미지_래퍼::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(
+    0deg, transparent, transparent 3px,
+    rgba(0,0,0,0.13) 3px, rgba(0,0,0,0.13) 4px
+  );
+  pointer-events: none;
+}
+
+.씬_이미지_래퍼::before {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 110px;
+  background: linear-gradient(to bottom, transparent, var(--색_패널));
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* 이미지 업로드 버튼 — 사용 안 함 */
+.씬_이미지_업로드_버튼 { display: none !important; }
+
+/* ── 씬 텍스트 영역 ── */
+.씬_내부 {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 9px;
-  overflow: hidden;
+  padding: 14px 28px 18px;
+  background: var(--색_패널);
+  overflow-y: auto;
+  min-height: 0;
 }
 
-.대시_컬럼:not(:last-child) {
-  border-right: 1px solid rgba(255,255,255,0.1);
+.씬_메타 {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 14px;
+  flex-shrink: 0;
 }
 
-/* 컬럼1: 씬 정보 */
-#대시_씬정보 {
-  justify-content: flex-start;
-}
-
-.대시_페이즈 {
-  font-family: var(--폰트_모노);
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--색_빨강);
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-}
-
-.대시_씬ID {
+.씬_ID_태그 {
   font-family: var(--폰트_UI);
   font-size: 10px;
   font-weight: 700;
@@ -479,219 +465,229 @@ body::before {
   background: var(--색_시안);
   padding: 3px 10px;
   letter-spacing: 2px;
-  display: inline-block;
-  align-self: flex-start;
 }
 
-.대시_씬제목 {
-  font-family: var(--폰트_본문);
-  font-size: 22px;
-  font-weight: 700;
-  color: #eeeeee;
-  line-height: 1.2;
-}
-
-.대시_위치태그 {
+.씬_페이즈_태그 {
   font-family: var(--폰트_모노);
-  font-size: 11px;
-  color: var(--색_음소거);
+  font-size: 10px;
+  color: #90c4d8;
   letter-spacing: 1px;
 }
 
-.대시_판정 {
-  display: none !important;
-}
-
-/* 컬럼2: 대사 */
-#대시_대사 {
-  position: relative;
-}
-
-.대시_배경묘사 {
+.씬_판정_태그 {
+  margin-left: auto;
   font-family: var(--폰트_모노);
-  font-size: 11px;
-  font-weight: 600;
+  font-size: 10px;
+  color: var(--색_앰버);
+  padding: 2px 9px;
+  border: 1px solid var(--색_앰버_dim);
+  background: rgba(255,179,0,0.04);
+}
+
+/* 배경 묘사 */
+.씬_배경묘사 {
+  font-family: var(--폰트_모노);
+  font-size: 10.5px;
   color: #90c4d8;
-  line-height: 1.6;
-  padding: 6px 12px;
+  line-height: 1.65;
+  margin-bottom: 12px;
+  padding: 8px 12px;
   border-left: 2px solid var(--색_경계_밝음);
-  background: rgba(0,229,255,0.02);
-  flex-shrink: 0;
+  background: rgba(0,229,255,0.022);
   white-space: pre-line;
+  flex-shrink: 0;
+  /* 내용이 길면 잘라서 공간 확보 */
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
 }
 
-/* 배경묘사 안의 시스템 로그성 span 숨김 */
-.대시_배경묘사 .강조_녹색,
-.대시_배경묘사 .강조_앰버,
-.대시_배경묘사 .강조_빨강 {
-  display: none;
+/* 대사 블록 */
+.대사_블록 {
+  margin-bottom: 13px;
+  opacity: 0;
+  transform: translateY(7px);
+  animation: 페이드업 0.38s ease forwards;
+  flex-shrink: 0;
 }
 
-.대시_대사_컨테이너 {
-  flex: 1;
-  overflow-y: auto;
-  border-left: 3px solid var(--색_시안);
-  padding-left: 14px;
-  min-height: 0;
-  scrollbar-width: thin;
-  scrollbar-color: var(--색_시안) transparent;
-}
-.대시_대사_컨테이너::-webkit-scrollbar { width: 3px; }
-.대시_대사_컨테이너::-webkit-scrollbar-thumb { background: var(--색_시안); }
-
-.대시_대사_블록 { margin-bottom: 10px; }
-.대시_화자명 {
-  font-family: var(--폰트_UI);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 2.5px;
+.화자명 {
+  font-family: var(--폰트_모노);
+  font-size: 10px;
+  letter-spacing: 2px;
   text-transform: uppercase;
   margin-bottom: 3px;
 }
-.대시_대사_텍스트 {
+
+.화자_시스템 { color: var(--색_빨강); }
+.화자_오빠   { color: var(--색_시안); }
+.화자_아버지 { color: var(--색_앰버); }
+.화자_어머니 { color: #ff8fab; }
+.화자_누이   { color: var(--색_녹색); }
+.화자_로그   { color: var(--색_음소거); }
+.화자_지문   { color: #90c4d8; font-style: italic; }
+
+.대사_텍스트 {
   font-size: 15px;
-  font-weight: 400;
-  line-height: 1.75;
+  line-height: 1.8;
   color: var(--색_텍스트);
 }
-.대시_대사_텍스트.지문_텍스트 {
+.대사_텍스트.지문_텍스트 {
   color: var(--색_음소거);
   font-style: italic;
   font-size: 13.5px;
 }
-
-/* 컬럼3: 선택지 */
-#대시_선택지 {
-  justify-content: flex-start;
-  gap: 8px;
-}
-
-#대시_선택지_목록 {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  flex: 1;
-  min-height: 0;
-}
-
-.대시_선택지_타이틀 {
-  font-family: var(--폰트_모노);
-  font-size: 10px;
-  font-weight: 700;
-  color: var(--색_음소거);
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  flex-shrink: 0;
-}
-
-.대시_선택_버튼 {
-  background: rgba(255,255,255,0.02);
-  border: 1px solid var(--선택_색, var(--색_시안));
-  color: var(--색_텍스트);
-  font-family: var(--폰트_본문);
-  font-size: 15px;
-  font-weight: 700;
-  padding: 0 14px;
-  text-align: left;
-  cursor: pointer;
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  position: relative;
-  transition: transform 0.15s, box-shadow 0.15s;
-  flex: 1;
-  min-height: 0;
-}
-.대시_선택_버튼::before {
-  content: '';
-  position: absolute; inset: 0;
-  background: var(--선택_색, var(--색_시안));
-  opacity: 0;
-  transition: opacity 0.15s;
-}
-.대시_선택_버튼:hover { transform: scale(1.01); box-shadow: 0 0 14px rgba(0,229,255,0.1); }
-.대시_선택_버튼:hover::before { opacity: 0.05; }
-.대시_선택_버튼:hover .대시_선택_레이블 { background: var(--선택_색); color: var(--색_배경); }
-.대시_선택_버튼:disabled { opacity: 0.3; cursor: not-allowed; pointer-events: none; }
-.대시_선택_버튼.잠금 { border-color: var(--색_경계); --선택_색: var(--색_경계); cursor: not-allowed; }
-
-.대시_선택_레이블 {
-  font-family: var(--폰트_UI);
-  font-size: 11px;
-  font-weight: 700;
-  padding: 3px 8px;
-  border: 1px solid var(--선택_색, var(--색_시안));
-  color: var(--선택_색, var(--색_시안));
-  letter-spacing: 1px;
-  transition: all 0.15s;
-  white-space: nowrap;
-  position: relative;
-  flex-shrink: 0;
-}
-
-.대시_선택_내용 { display: flex; flex-direction: column; gap: 0; position: relative; }
-.대시_선택_본문 { font-size: 15px; font-weight: 700; line-height: 1.3; }
-.대시_선택_효과 { display: none; }
-
-/* ─── 레거시 씬_패널 숨김 ─── */
-#씬_패널 { display: none; }
-
-/* 화자 색상 (대시보드 버전) */
-.대시_화자명.화자_시스템 { color: var(--색_빨강); }
-.대시_화자명.화자_오빠   { color: var(--색_시안); }
-.대시_화자명.화자_아버지 { color: var(--색_앰버); }
-.대시_화자명.화자_어머니 { color: #ff8fab; }
-.대시_화자명.화자_누이   { color: var(--색_녹색); }
-.대시_화자명.화자_로그   { color: var(--색_음소거); }
-.대시_화자명.화자_지문   { color: #90c4d8; font-style: italic; }
 
 /* 인라인 강조 */
 .강조_녹색 { color: var(--색_녹색); font-weight: 700; }
 .강조_빨강 { color: var(--색_빨강); font-weight: 700; }
 .강조_앰버 { color: var(--색_앰버); font-weight: 700; }
 
-/* 색상 클래스 (선택지 버튼용) */
+/* 선택지 영역 */
+#선택지_영역 {
+  margin-top: auto;
+  padding-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  opacity: 0;
+  animation: 페이드업 0.45s ease 0.75s forwards;
+  flex-shrink: 0;
+}
+
+.선택지_버튼 {
+  background: transparent;
+  border: 1px solid var(--선택_색, var(--색_시안));
+  color: var(--색_텍스트);
+  font-family: var(--폰트_본문);
+  font-size: 13px;
+  padding: 10px 16px;
+  text-align: left;
+  cursor: pointer;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 14px;
+  align-items: start;
+  position: relative;
+  transition: box-shadow 0.18s;
+}
+.선택지_버튼::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: var(--선택_색, var(--색_시안));
+  opacity: 0;
+  transition: opacity 0.18s;
+}
+.선택지_버튼:hover { box-shadow: inset 0 0 0 1px var(--선택_색), 0 0 14px rgba(0,229,255,0.07); }
+.선택지_버튼:hover::before { opacity: 0.04; }
+.선택지_버튼:hover .선택지_레이블 { background: var(--선택_색); color: var(--색_배경); }
+.선택지_버튼:disabled { opacity: 0.32; cursor: not-allowed; pointer-events: none; }
+
+.선택지_버튼.잠금 { border-color: var(--색_경계); --선택_색: var(--색_경계); cursor: not-allowed; }
+.선택지_버튼.잠금 .선택지_레이블 { border-color: var(--색_경계); color: var(--색_경계); }
+.선택지_버튼.잠금 .선택지_본문 { color: var(--색_음소거); }
+
+.선택지_레이블 {
+  font-family: var(--폰트_UI);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border: 1px solid var(--선택_색, var(--색_시안));
+  color: var(--선택_색, var(--색_시안));
+  letter-spacing: 1px;
+  transition: all 0.18s;
+  white-space: nowrap;
+  margin-top: 2px;
+  position: relative;
+}
+
+.선택지_내용 { display: flex; flex-direction: column; gap: 3px; position: relative; }
+.선택지_본문 { font-size: 15px; }
+.선택지_효과 {
+  font-family: var(--폰트_모노);
+  font-size: 10px;
+  color: #8bbfd4;
+  letter-spacing: 0.5px;
+}
+.선택지_잠금_안내 {
+  font-family: var(--폰트_모노);
+  font-size: 10px;
+  color: var(--색_빨강);
+}
+
+/* 색상 클래스 */
 .색_시안  { --선택_색: var(--색_시안); }
 .색_빨강  { --선택_색: var(--색_빨강); }
 .색_앰버  { --선택_색: var(--색_앰버); }
 .색_녹색  { --선택_색: var(--색_녹색); }
 .색_보라  { --선택_색: var(--색_보라); }
+
+/* ═══════════════════════════════════════════════
+   엔딩 화면 — 스크롤 없이 한 페이지
 ═══════════════════════════════════════════════ */
 #엔딩_화면 {
   display: none;
   position: fixed; inset: 0;
   background: var(--색_배경);
   z-index: 6000;
-  overflow-y: auto;
+  overflow: hidden;           /* 스크롤 없음 */
+  padding-top: var(--헤더_높이);
 }
-#엔딩_화면.보임 {
+
+/* 전체를 상하 flex로 */
+.엔딩_레이아웃 {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* 상단: 영상 영역 */
+.엔딩_비디오_래퍼 {
+  flex-shrink: 0;
+  width: 100%;
+  height: 46vh;
+  background: #000;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
+}
+.엔딩_비디오_래퍼 video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  background: #000;
 }
 
+/* 하단: 텍스트 결과 영역 */
 .엔딩_내부 {
-  max-width: 700px;
-  width: 100%;
-  margin: 0 auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;    /* 수직 가운데 정렬 */
+  padding: 16px 32px 20px;
+  overflow: hidden;           /* 스크롤 없음 */
   text-align: center;
-  padding: 40px 32px;
+  gap: 6px;
 }
 
 .엔딩_분류 {
   font-family: var(--폰트_모노);
-  font-size: 11px;
+  font-size: 10px;
   letter-spacing: 4px;
   color: #8bbfd4;
-  margin-bottom: 14px;
 }
 .엔딩_제목 {
   font-family: var(--폰트_UI);
-  font-size: clamp(28px, 5vw, 44px);
+  font-size: clamp(22px, 3.5vw, 40px);
   font-weight: 900;
   letter-spacing: 5px;
-  margin-bottom: 8px;
+  line-height: 1;
 }
 .엔딩_제목.혁명가 { color: var(--색_빨강); text-shadow: var(--글로우_빨강); }
 .엔딩_제목.생존자  { color: var(--색_앰버); text-shadow: 0 0 24px #ffb30040; }
@@ -699,69 +695,64 @@ body::before {
 
 .엔딩_부제 {
   font-family: var(--폰트_모노);
-  font-size: 11px;
+  font-size: 10px;
   letter-spacing: 3px;
-  margin-bottom: 28px;
-  opacity: 0.7;
+  opacity: 0.6;
 }
 .엔딩_구분선 {
-  width: 60px; height: 1px;
-  margin: 0 auto 28px;
-  opacity: 0.4;
+  width: 50px; height: 1px;
+  opacity: 0.35;
+  margin: 2px auto;
 }
 .엔딩_본문 {
-  font-size: 15px;
-  line-height: 2;
+  font-size: 13px;
+  line-height: 1.8;
   color: #90c4d8;
-  margin-bottom: 40px;
 }
 .엔딩_수치_요약 {
-  display: inline-flex;
+  display: flex;
   flex-wrap: wrap;
-  gap: 20px;
+  gap: 10px 20px;
   justify-content: center;
-  margin-bottom: 16px;
-  padding: 18px 28px;
+  padding: 10px 18px;
   border: 1px solid var(--색_경계);
   background: var(--색_패널);
 }
 .요약_항목 { text-align: center; }
 .요약_라벨 {
   font-family: var(--폰트_모노);
-  font-size: 9px;
+  font-size: 8px;
   color: #8bbfd4;
   letter-spacing: 1px;
   display: block;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 .요약_값 {
   font-family: var(--폰트_UI);
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 700;
 }
 .엔딩_판정_설명 {
   font-family: var(--폰트_모노);
-  font-size: 11px;
+  font-size: 10px;
   color: var(--색_음소거);
   letter-spacing: 1px;
-  margin-bottom: 36px;
 }
 .FIN_태그 {
   font-family: var(--폰트_모노);
-  font-size: 11px;
+  font-size: 10px;
   color: var(--색_음소거);
   letter-spacing: 4px;
-  margin-bottom: 28px;
 }
 .재시작_버튼 {
   font-family: var(--폰트_UI);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 3px;
   color: var(--색_배경);
   background: var(--색_시안);
   border: none;
-  padding: 13px 38px;
+  padding: 10px 32px;
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -783,473 +774,181 @@ body::before {
 #로그_톱니바퀴.활성 svg { animation: 톱니_회전 2.5s linear infinite; }
 
 /* ═══════════════════════════════════════════════
-   [NEW] 스모그 레이어
-═══════════════════════════════════════════════ */
-#스모그_레이어 {
-  position: fixed; inset: 0;
-  pointer-events: none;
-  z-index: 8500;
-  overflow: hidden;
-}
-.스모그_클라우드 {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(60px);
-  animation: 스모그_유동 linear infinite;
-  opacity: 0;
-}
-@keyframes 스모그_유동 {
-  0%   { transform: translate(0, 0) scale(1);   opacity: 0; }
-  15%  { opacity: var(--스모그_최대_불투명, 0.06); }
-  85%  { opacity: var(--스모그_최대_불투명, 0.06); }
-  100% { transform: translate(var(--스모그_dx, 60px), var(--스모그_dy, -40px)) scale(1.3); opacity: 0; }
-}
-
-/* ═══════════════════════════════════════════════
-   [NEW] RGB 글리치 오버레이
-═══════════════════════════════════════════════ */
-#글리치_오버레이 {
-  position: fixed; inset: 0;
-  pointer-events: none;
-  z-index: 8700;
-}
-.글리치_슬라이스 {
-  position: absolute;
-  left: 0; right: 0;
-  height: var(--슬라이스_높이, 3px);
-  background: var(--슬라이스_색, rgba(0,229,255,0.15));
-  transform: translateX(var(--슬라이스_오프셋, 0px));
-  mix-blend-mode: screen;
-  opacity: 0;
-  animation: 글리치_슬라이스_동작 linear infinite;
-  animation-duration: var(--슬라이스_주기, 4s);
-  animation-delay: var(--슬라이스_딜레이, 0s);
-}
-@keyframes 글리치_슬라이스_동작 {
-  0%,89%,100% { opacity:0; transform: translateX(0); }
-  90% { opacity:1; transform: translateX(var(--슬라이스_오프셋, -8px)); }
-  91% { opacity:0; }
-  92% { opacity:1; transform: translateX(calc(var(--슬라이스_오프셋, -8px) * -0.5)); }
-  93%,100% { opacity:0; }
-}
-
-/* ═══════════════════════════════════════════════
-   [NEW] 실시간 노이즈 오버레이
-═══════════════════════════════════════════════ */
-#노이즈_캔버스 {
-  position: fixed; inset: 0;
-  pointer-events: none;
-  z-index: 8600;
-  opacity: 0.045;
-  mix-blend-mode: screen;
-}
-
-/* ═══════════════════════════════════════════════
-   [NEW] 파티클 캔버스
-═══════════════════════════════════════════════ */
-#파티클_캔버스 {
-  position: fixed; inset: 0;
-  pointer-events: none;
-  z-index: 1;
-  opacity: 0.7;
-}
-
-/* ═══════════════════════════════════════════════
-   [NEW] 선택지 홀로그램 hover 효과
-═══════════════════════════════════════════════ */
-.대시_선택_버튼 {
-  overflow: hidden;
-}
-.대시_선택_버튼::after {
-  content: '';
-  position: absolute; inset: 0;
-  background: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 3px,
-    rgba(0,229,255,0.03) 3px,
-    rgba(0,229,255,0.03) 4px
-  );
-  opacity: 0;
-  transition: opacity 0.2s;
-  pointer-events: none;
-}
-.대시_선택_버튼:hover::after { opacity: 1; }
-
-/* 홀로그램 스캔 라인 효과 */
-.대시_선택_버튼 .홀로_스캔 {
-  position: absolute;
-  left: 0; right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, var(--선택_색, var(--색_시안)), transparent);
-  top: -2px;
-  opacity: 0;
-  filter: blur(1px);
-  transition: none;
-  pointer-events: none;
-}
-.대시_선택_버튼:hover .홀로_스캔 {
-  animation: 홀로_스캔_이동 0.8s ease-in-out infinite;
-  opacity: 0.8;
-}
-@keyframes 홀로_스캔_이동 {
-  0%   { top: -2px; opacity: 0; }
-  10%  { opacity: 0.8; }
-  90%  { opacity: 0.8; }
-  100% { top: calc(100% + 2px); opacity: 0; }
-}
-
-/* 홀로그램 코너 마커 */
-.대시_선택_버튼 .홀로_코너 {
-  position: absolute;
-  width: 8px; height: 8px;
-  opacity: 0;
-  transition: opacity 0.2s;
-  pointer-events: none;
-}
-.대시_선택_버튼:hover .홀로_코너 { opacity: 1; }
-.홀로_코너.좌상 { top: 3px; left: 3px; border-top: 1px solid var(--선택_색, var(--색_시안)); border-left: 1px solid var(--선택_색, var(--색_시안)); }
-.홀로_코너.우상 { top: 3px; right: 3px; border-top: 1px solid var(--선택_색, var(--색_시안)); border-right: 1px solid var(--선택_색, var(--색_시안)); }
-.홀로_코너.좌하 { bottom: 3px; left: 3px; border-bottom: 1px solid var(--선택_색, var(--색_시안)); border-left: 1px solid var(--선택_색, var(--색_시안)); }
-.홀로_코너.우하 { bottom: 3px; right: 3px; border-bottom: 1px solid var(--선택_색, var(--색_시안)); border-right: 1px solid var(--선택_색, var(--색_시안)); }
-
-/* 홀로그램 glitch flicker */
-@keyframes 홀로_글리치 {
-  0%,96%,100% { clip-path: none; transform: none; }
-  97% { clip-path: inset(20% 0 60% 0); transform: translateX(-3px); }
-  98% { clip-path: inset(60% 0 10% 0); transform: translateX(3px); }
-  99% { clip-path: none; transform: translateX(-1px); }
-}
-.대시_선택_버튼:hover {
-  animation: 홀로_글리치 3s step-end infinite;
-}
-
-/* ═══════════════════════════════════════════════
-   [NEW] 타이핑 애니메이션
-═══════════════════════════════════════════════ */
-.타이핑_텍스트 {
-  overflow: hidden;
-  white-space: nowrap;
-  border-right: 2px solid var(--색_시안);
-  animation: 타이핑_커서 0.75s step-end infinite;
-}
-@keyframes 타이핑_커서 {
-  0%,100% { border-color: var(--색_시안); }
-  50%     { border-color: transparent; }
-}
-.타이핑_완료 {
-  border-right: none;
-  animation: none;
-  white-space: normal;
-  overflow: visible;
-}
-
-/* ═══════════════════════════════════════════════
-   [NEW] 시작 화면
-═══════════════════════════════════════════════ */
-#시작_화면 {
-  position: fixed; inset: 0;
-  background: #020508;
-  z-index: 9500;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  overflow: hidden;
-  transition: opacity 1.2s ease;
-}
-#시작_화면.페이드아웃 {
-  opacity: 0;
-  pointer-events: none;
-}
-
-/* 시작화면 배경 그리드 */
-#시작_화면::before {
-  content: '';
-  position: absolute; inset: 0;
-  background:
-    linear-gradient(rgba(0,229,255,0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,229,255,0.04) 1px, transparent 1px);
-  background-size: 48px 48px;
-  animation: 그리드_이동 12s linear infinite;
-}
-@keyframes 그리드_이동 {
-  from { background-position: 0 0; }
-  to   { background-position: 48px 48px; }
-}
-
-/* 중앙 글로우 */
-#시작_화면::after {
-  content: '';
-  position: absolute;
-  width: 800px; height: 500px;
-  left: 50%; top: 50%;
-  transform: translate(-50%, -50%);
-  background: radial-gradient(ellipse, rgba(0,80,120,0.25) 0%, transparent 70%);
-  pointer-events: none;
-}
-
-.시작_컨텐츠 {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0;
-}
-
-/* 학번 / 이름 */
-.시작_메타 {
-  font-family: var(--폰트_모노);
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--색_텍스트);
-  letter-spacing: 5px;
-  margin-bottom: 32px;
-  opacity: 0;
-  animation: 페이드업 0.6s ease 0.3s forwards;
-}
-
-/* 메인 타이틀 — FOX SISTER */
-.시작_타이틀_상단 {
-  font-family: var(--폰트_UI);
-  font-size: clamp(42px, 7vw, 88px);
-  font-weight: 900;
-  letter-spacing: 18px;
-  color: var(--색_텍스트);
-  text-shadow: 0 0 40px rgba(0,229,255,0.25), 0 0 80px rgba(0,229,255,0.1);
-  line-height: 1;
-  opacity: 0;
-  animation: 시작_등장 0.9s cubic-bezier(0.16,1,0.3,1) 0.7s forwards;
-  position: relative;
-}
-.시작_타이틀_상단 .시작_강조 {
-  color: var(--색_빨강);
-  text-shadow: var(--글로우_빨강), 0 0 60px rgba(255,45,74,0.2);
-}
-/* RGB 글리치 on title */
-.시작_타이틀_상단::before,
-.시작_타이틀_상단::after {
-  content: attr(data-text);
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  opacity: 0;
-}
-.시작_타이틀_상단::before {
-  color: var(--색_빨강);
-  animation: 시작_글리치_레드 6s step-end infinite 2s;
-  clip-path: inset(30% 0 50% 0);
-}
-.시작_타이틀_상단::after {
-  color: var(--색_시안);
-  animation: 시작_글리치_시안 6s step-end infinite 2.15s;
-  clip-path: inset(60% 0 20% 0);
-}
-@keyframes 시작_글리치_레드 {
-  0%,93%,100% { opacity:0; transform:none; }
-  94% { opacity:0.6; transform:translateX(-4px); }
-  96% { opacity:0; }
-  97% { opacity:0.4; transform:translateX(3px); }
-  98%,99% { opacity:0; }
-}
-@keyframes 시작_글리치_시안 {
-  0%,93%,100% { opacity:0; transform:none; }
-  94% { opacity:0.5; transform:translateX(4px); }
-  96% { opacity:0; }
-  97% { opacity:0.35; transform:translateX(-2px); }
-  98%,99% { opacity:0; }
-}
-
-@keyframes 시작_등장 {
-  from { opacity:0; transform: translateY(20px) skewX(-2deg); }
-  to   { opacity:1; transform: translateY(0)    skewX(0deg); }
-}
-
-/* 부제 — gene containment */
-.시작_타이틀_하단 {
-  font-family: var(--폰트_모노);
-  font-size: clamp(11px, 1.6vw, 16px);
-  letter-spacing: 10px;
-  color: var(--색_음소거);
-  margin-top: 12px;
-  opacity: 0;
-  animation: 페이드업 0.7s ease 1.3s forwards;
-}
-
-/* 구분선 */
-.시작_구분선 {
-  width: 180px; height: 1px;
-  background: linear-gradient(90deg, transparent, var(--색_시안), transparent);
-  margin: 32px auto;
-  opacity: 0;
-  animation: 페이드업 0.6s ease 1.6s forwards;
-}
-
-/* [시스템 접속] 문구 */
-.시작_접속문구 {
-  font-family: var(--폰트_모노);
-  font-size: clamp(13px, 2vw, 17px);
-  color: var(--색_시안);
-  letter-spacing: 8px;
-  opacity: 0;
-  animation: 페이드업 0.6s ease 1.9s forwards;
-  text-shadow: var(--글로우_시안);
-}
-.시작_접속문구 .접속_브라켓 { color: rgba(0,229,255,0.4); }
-
-/* 시작 버튼 */
-.시작_버튼_영역 {
-  margin-top: 52px;
-  opacity: 0;
-  animation: 페이드업 0.7s ease 2.5s forwards;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 14px;
-}
-
-.시작_버튼 {
-  font-family: var(--폰트_UI);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 5px;
-  color: var(--색_배경);
-  background: var(--색_시안);
-  border: none;
-  padding: 15px 52px;
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-  transition: all 0.25s;
-  clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
-}
-.시작_버튼::before {
-  content: '';
-  position: absolute; inset: 0;
-  background: linear-gradient(90deg, transparent 30%, rgba(255,255,255,0.3) 50%, transparent 70%);
-  transform: translateX(-100%);
-  transition: transform 0.5s ease;
-}
-.시작_버튼:hover { box-shadow: 0 0 30px rgba(0,229,255,0.5), 0 0 60px rgba(0,229,255,0.15); }
-.시작_버튼:hover::before { transform: translateX(100%); }
-
-.시작_버튼_힌트 {
-  font-family: var(--폰트_모노);
-  font-size: 9px;
-  color: rgba(139,191,212,0.4);
-  letter-spacing: 2px;
-  animation: 깜빡임 2s step-end infinite;
-}
-
-/* 하단 코너 데코 */
-.시작_코너 {
-  position: absolute;
-  width: 20px; height: 20px;
-  opacity: 0.35;
-}
-.시작_코너.좌상 { top: 24px; left: 24px; border-top: 1px solid var(--색_시안); border-left: 1px solid var(--색_시안); }
-.시작_코너.우상 { top: 24px; right: 24px; border-top: 1px solid var(--색_시안); border-right: 1px solid var(--색_시안); }
-.시작_코너.좌하 { bottom: 24px; left: 24px; border-bottom: 1px solid var(--색_시안); border-left: 1px solid var(--색_시안); }
-.시작_코너.우하 { bottom: 24px; right: 24px; border-bottom: 1px solid var(--색_시안); border-right: 1px solid var(--색_시안); }
-
-/* 스캔라인 데코 (시작화면 내) */
-.시작_스캔바 {
-  position: absolute;
-  left: 0; right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(0,229,255,0.3), transparent);
-  animation: 시작_스캔 8s linear infinite;
-}
-@keyframes 시작_스캔 {
-  0%   { top: -1px; opacity:0; }
-  5%   { opacity:1; }
-  95%  { opacity:0.5; }
-  100% { top: 100%; opacity:0; }
-}
-
-/* ═══════════════════════════════════════════════
    반응형
 ═══════════════════════════════════════════════ */
-@media (max-width: 900px) {
-  #씬_대시보드 {
-    grid-template-columns: 1fr 1.8fr 1.4fr;
-    height: 310px;
-  }
-}
 @media (max-width: 768px) {
   #헤더 { padding: 0 14px; }
   #수치_바_영역 { gap: 6px; }
   .수치_블록 { min-width: 60px; padding: 4px 8px; }
   .수치_값 { font-size: 14px; }
+  .씬_내부 { padding: 14px 16px 20px; }
   #로그_패널 { width: 100%; }
-  #씬_대시보드 {
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: auto auto;
-    height: auto;
-    max-height: 50vh;
-    overflow-y: auto;
-  }
-  #대시_씬정보 { grid-column: 1; }
-  #대시_대사 { grid-column: 2; }
-  #대시_선택지 { grid-column: 1 / -1; border-top: 1px solid rgba(255,255,255,0.1); border-right: none; }
+  .엔딩_비디오_래퍼 { height: 35vh; }
+  .엔딩_내부 { padding: 12px 20px 16px; }
 }
 @media (max-width: 480px) {
   .로고_부제 { display: none; }
   .수치_라벨 { display: none; }
   .수치_블록 { min-width: 48px; padding: 4px 6px; }
-  #씬_대시보드 { grid-template-columns: 1fr; height: auto; }
-  #대시_씬정보, #대시_대사, #대시_선택지 { grid-column: 1; border-right: none; border-top: 1px solid rgba(255,255,255,0.08); }
+  .엔딩_비디오_래퍼 { height: 28vh; }
 }
+
+/* ── 스타트 화면 ── */
+#스타트_화면 {
+  position: fixed; inset: 0;
+  z-index: 9500;
+  background: #000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+#스타트_화면.숨김 { display: none; }
+
+.스타트_배경 {
+  position: absolute; inset: 0;
+  overflow: hidden;
+}
+
+/* 스타트 배경 비디오 */
+.스타트_배경 video {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  opacity: 0.82;
+  filter: brightness(0.68);
+}
+
+/* 스타트 오버레이 그라데이션 */
+.스타트_배경::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(2,5,8,0.2) 0%,
+    rgba(2,5,8,0.1) 40%,
+    rgba(2,5,8,0.85) 100%
+  );
+}
+
+.스타트_콘텐츠 {
+  position: relative; z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  text-align: center;
+  padding: 0 24px;
+}
+
+.스타트_타이틀 {
+  font-family: var(--폰트_UI);
+  font-size: clamp(32px, 6vw, 72px);
+  font-weight: 900;
+  letter-spacing: 8px;
+  color: #fff;
+  text-shadow: 0 0 40px rgba(0,229,255,0.6), 0 0 80px rgba(0,229,255,0.3);
+  line-height: 1;
+}
+.스타트_타이틀 .강조_빨강 {
+  color: var(--색_빨강);
+  text-shadow: 0 0 40px rgba(255,45,74,0.7), 0 0 80px rgba(255,45,74,0.3);
+}
+
+.스타트_부제 {
+  font-family: var(--폰트_모노);
+  font-size: clamp(10px, 1.5vw, 14px);
+  color: var(--색_음소거);
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  margin-top: -8px;
+}
+
+.스타트_구분선 {
+  width: 120px; height: 1px;
+  background: linear-gradient(to right, transparent, var(--색_시안), transparent);
+  margin: 4px 0;
+}
+
+.스타트_시작버튼 {
+  font-family: var(--폰트_UI);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 5px;
+  color: var(--색_배경);
+  background: var(--색_시안);
+  border: none;
+  padding: 14px 48px;
+  cursor: pointer;
+  margin-top: 12px;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.스타트_시작버튼::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: #fff;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.스타트_시작버튼:hover { box-shadow: 0 0 32px rgba(0,229,255,0.6); }
+.스타트_시작버튼:hover::before { opacity: 0.1; }
+
+.스타트_버전 {
+  font-family: var(--폰트_모노);
+  font-size: 10px;
+  color: rgba(100,160,180,0.4);
+  letter-spacing: 2px;
+  margin-top: 8px;
+}
+
+.스타트_크레딧 {
+  font-family: var(--폰트_모노);
+  font-size: 11px;
+  color: rgba(200,220,230,0.55);
+  letter-spacing: 3px;
+  margin-top: 4px;
+}
+
+/* 스타트 화면 스캔라인 */
+#스타트_화면::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(
+    0deg, transparent, transparent 2px,
+    rgba(0,0,0,0.08) 2px, rgba(0,0,0,0.08) 4px
+  );
+  pointer-events: none;
+  z-index: 2;
+}
+
 </style>
 </head>
 <body>
 
-<!-- ════ 시작 화면 ════ -->
-<div id="시작_화면">
-  <div class="시작_코너 좌상"></div>
-  <div class="시작_코너 우상"></div>
-  <div class="시작_코너 좌하"></div>
-  <div class="시작_코너 우하"></div>
-  <div class="시작_스캔바"></div>
-
-  <div class="시작_컨텐츠">
-    <div class="시작_메타">24730029 &nbsp;|&nbsp; 정다연</div>
-
-    <div class="시작_타이틀_상단" data-text="FOX SISTER">
-      FOX <span class="시작_강조">SISTER</span>
-    </div>
-    <div class="시작_타이틀_하단">GENE CONTAINMENT</div>
-
-    <div class="시작_구분선"></div>
-
-    <div class="시작_접속문구">
-      <span class="접속_브라켓">[</span>&nbsp;시스템 접속&nbsp;<span class="접속_브라켓">]</span>
-    </div>
-
-    <div class="시작_버튼_영역">
-      <button class="시작_버튼" onclick="시작화면_닫기()">SYSTEM ACCESS</button>
-      <div class="시작_버튼_힌트">— PRESS TO INITIALIZE —</div>
-    </div>
+<!-- ════ 고정 헤더 ════ -->
+<!-- ════ 스타트 화면 ════ -->
+<div id="스타트_화면">
+  <div class="스타트_배경">
+    <video id="스타트_비디오" src="video/title.mp4" autoplay loop muted playsinline></video>
+  </div>
+  <div class="스타트_콘텐츠">
+    <div class="스타트_타이틀">FOX <span class="강조_빨강">SISTER</span></div>
+    <div class="스타트_부제">Gene Containment</div>
+    <div class="스타트_구분선"></div>
+    <button class="스타트_시작버튼" onclick="게임_시작()">START</button>
+    <div class="스타트_버전">GENETIC CLASSIFICATION SYSTEM v4.7.2 / TOWER-7</div>
+    <div class="스타트_크레딧">24730029 정다연</div>
   </div>
 </div>
 
-<!-- ════ 파티클 캔버스 ════ -->
-<canvas id="파티클_캔버스"></canvas>
-
-<!-- ════ 노이즈 캔버스 ════ -->
-<canvas id="노이즈_캔버스"></canvas>
-
-<!-- ════ 스모그 레이어 ════ -->
-<div id="스모그_레이어"></div>
-
-<!-- ════ RGB 글리치 오버레이 ════ -->
-<div id="글리치_오버레이"></div>
-
-<!-- ════ 고정 헤더 ════ -->
 <header id="헤더">
 
   <!-- 왼쪽: 로고 -->
-  <div class="로고_묶음">
+  <div class="로고_묶음" onclick="스타트_화면_표시()" style="cursor:pointer" title="타이틀로 돌아가기">
     <div class="로고_타이틀">FOX <span class="강조">SISTER</span></div>
     <div class="로고_부제">GENE CONTAINMENT / GENETIC CLASSIFICATION SYSTEM v4.7.2</div>
   </div>
@@ -1315,51 +1014,17 @@ body::before {
   <!-- 롤백 배너 -->
   <div id="롤백_배너">⚠ CRITICAL ERROR — LOG ROLLBACK INITIATED — CHECKPOINT RESTORED</div>
 
-  <!-- 씬 이미지 스테이지 -->
-  <div id="씬_스테이지">
-    <!-- 씬 렌더링이 이미지 슬롯을 여기에 주입 -->
-    <label class="씬_이미지_업로드_버튼" id="스테이지_업로드_버튼" style="display:none">
-      ⬆ 이미지 업로드
-      <input type="file" accept="image/*" id="스테이지_파일_입력">
-    </label>
-  </div>
-
-  <!-- 하단 3단 대시보드 -->
-  <div id="씬_대시보드">
-    <!-- 컬럼 1: 씬 정보 -->
-    <div class="대시_컬럼" id="대시_씬정보">
-      <div class="대시_페이즈" id="대시_페이즈_텍스트">—</div>
-      <div class="대시_씬ID" id="대시_씬ID_텍스트">—</div>
-      <div class="대시_씬제목" id="대시_씬제목_텍스트">—</div>
-      <div class="대시_위치태그" id="대시_위치_텍스트">—</div>
-      <div class="대시_판정" id="대시_판정_텍스트" style="display:none">—</div>
-    </div>
-
-    <!-- 컬럼 2: 배경묘사 + 대사 -->
-    <div class="대시_컬럼" id="대시_대사">
-      <div class="대시_배경묘사" id="대시_배경묘사_텍스트">—</div>
-      <div class="대시_대사_컨테이너" id="대시_대사_영역">
-        <!-- 대사 블록 주입 -->
-      </div>
-    </div>
-
-    <!-- 컬럼 3: 선택지 -->
-    <div class="대시_컬럼" id="대시_선택지">
-      <div class="대시_선택지_타이틀">— SELECT ACTION —</div>
-      <div id="대시_선택지_목록">
-        <!-- 선택지 버튼 주입 -->
-      </div>
-    </div>
-  </div>
-
-  <!-- 레거시 패널 (숨김 — JS 참조용) -->
-  <div id="씬_패널" style="display:none"></div>
+  <!-- 씬 패널 (전체 남은 공간) -->
+  <div id="씬_패널"></div>
 
 </main>
 
 <!-- ════ 엔딩 화면 ════ -->
 <div id="엔딩_화면">
-  <div class="엔딩_내부" id="엔딩_내부_컨텐츠"></div>
+  <div class="엔딩_레이아웃">
+    <div class="엔딩_비디오_래퍼" id="엔딩_비디오_래퍼"></div>
+    <div class="엔딩_내부" id="엔딩_내부_컨텐츠"></div>
+  </div>
 </div>
 
 <script>
@@ -1367,6 +1032,9 @@ body::before {
    FOX SISTER : Gene Containment — 메인 게임 스크립트
 ═══════════════════════════════════════════════════════════════ */
 
+
+/* 엔딩별 이미지 — base64 embed */
+/* 엔딩 이미지 제거 — 영상으로 대체 */
 /* ─────────────────────────────────────────────────────────────
    [1] 게임 상태 객체
 ───────────────────────────────────────────────────────────── */
@@ -1384,8 +1052,38 @@ let 게임상태 = {
    [2] 씬별 이미지 경로 — 교체 시 여기만 수정
 ───────────────────────────────────────────────────────────── */
 const 씬_이미지 = {
-  S1: null, S2: null, S3: null,
-  S4: null, S5: null, RE_S4: null, S6: null,
+  S1:    null,
+  S2:    null,
+  S3:    'image/S3.png',
+  S4:    'image/S4.png',
+  S5:    'image/S5.png',
+  S6:    'image/S6.png',
+  RE_S4: 'image/RE_S4.png',
+};
+
+/* 씬별 영상 — 영상이 있으면 이미지보다 우선 표시 */
+const 씬_비디오 = { S1:null, S2:null, S3:null, S4:null, S5:null, RE_S4:null, S6:null };
+
+
+const 엔딩_비디오 = { 혁명:null, 생존:null, 소거:null };
+
+/* ── 씬 영상 raw base64 (Blob URL 변환용) ── */
+/* 씬 영상 경로 맵 */
+const 씬_영상_경로 = {
+  S1:    'video/S1.mp4',
+  S2:    'video/S2.mp4',
+  S3:    'video/S3.mp4',
+  S4:    'video/S4.mp4',
+  S5:    'video/S5.mp4',
+  S6:    'video/S6.mp4',
+  RE_S4: 'video/RE_S4.mp4',
+};
+
+/* 엔딩 영상 경로 맵 */
+const 엔딩_영상_경로 = {
+  혁명: 'video/END_A.mp4',
+  생존: 'video/END_B.mp4',
+  소거: 'video/GAME_OVER.mp4',
 };
 
 const 씬_배경명 = {
@@ -1393,6 +1091,105 @@ const 씬_배경명 = {
   S4: '야간 격리 구역', S5: '중앙 복도 추격전',
   RE_S4: '로그 롤백', S6: '에어락 게이트',
 };
+
+/* 씬 음악 경로 맵 — mp3 폴더 참조 */
+const 씬_음악_경로 = {
+  S1:    'mp3/S1.mp3',
+  S2:    'mp3/S2.mp3',
+  S3:    'mp3/S3.mp3',
+  S4:    'mp3/S4.mp3',
+  S5:    'mp3/S5.mp3',
+  S6:    'mp3/S6.mp3',
+  RE_S4: 'mp3/RE_S4.mp3',
+};
+
+/* ─────────────────────────────────────────────────────────────
+   오디오 시스템
+   크롬 정책: AudioContext는 사용자 클릭 컨텍스트에서 생성 + resume()
+   해결 전략:
+   1) START 버튼 onclick 에서 AudioContext 생성 및 resume()
+   2) resume() Promise 완료 후 fetch → decode → play
+   3) 씬 전환 시에는 ctx가 이미 running 상태이므로 바로 재생
+───────────────────────────────────────────────────────────── */
+let _ctx = null;             /* AudioContext */
+let _소스 = null;            /* 현재 AudioBufferSourceNode */
+let _게인 = null;            /* 현재 GainNode */
+let _현재경로 = null;        /* 현재 재생 경로 */
+let _ctx준비됨 = false;      /* ctx.resume() 완료 여부 */
+const _캐시 = {};            /* 경로 → AudioBuffer 캐시 */
+
+/* AudioContext 생성 (최초 1회) + resume — 반드시 클릭 핸들러에서 호출 */
+function _ctx_언락() {
+  return new Promise(function(resolve) {
+    if (!_ctx) {
+      _ctx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (_ctx.state === 'running') {
+      _ctx준비됨 = true;
+      resolve();
+    } else {
+      _ctx.resume().then(function() {
+        _ctx준비됨 = true;
+        resolve();
+      });
+    }
+  });
+}
+
+/* fetch + decode (캐시 활용) */
+function _로드(경로) {
+  if (_캐시[경로]) return Promise.resolve(_캐시[경로]);
+  return fetch(경로)
+    .then(function(r) {
+      if (!r.ok) throw new Error('fetch 실패: ' + 경로);
+      return r.arrayBuffer();
+    })
+    .then(function(ab) { return _ctx.decodeAudioData(ab); })
+    .then(function(buf) { _캐시[경로] = buf; return buf; });
+}
+
+/* 페이드 아웃 후 정지, 콜백 실행 */
+function _정지(콜백) {
+  if (!_소스 || !_게인) { 콜백 && 콜백(); return; }
+  const g = _게인, s = _소스;
+  _소스 = null; _게인 = null;
+  g.gain.setValueAtTime(g.gain.value, _ctx.currentTime);
+  g.gain.linearRampToValueAtTime(0, _ctx.currentTime + 0.6);
+  setTimeout(function() {
+    try { s.stop(); } catch(e) {}
+    콜백 && 콜백();
+  }, 650);
+}
+
+/* 버퍼 재생 */
+function _재생(buf, 경로) {
+  if (!_ctx || _현재경로 === 경로) return;
+  _현재경로 = 경로;
+  const s = _ctx.createBufferSource();
+  s.buffer = buf; s.loop = true;
+  const g = _ctx.createGain();
+  g.gain.setValueAtTime(0, _ctx.currentTime);
+  g.gain.linearRampToValueAtTime(0.8, _ctx.currentTime + 1.5);
+  s.connect(g); g.connect(_ctx.destination);
+  s.start(0);
+  _소스 = s; _게인 = g;
+}
+
+/* 외부 호출용 — ctx 준비 안 됐으면 무시 (게임_시작 이후에만 동작) */
+function 음악_재생(경로) {
+  if (!경로 || !_ctx준비됨) return;
+  if (_현재경로 === 경로) return;
+  _정지(function() {
+    _현재경로 = null;
+    _로드(경로).then(function(buf) { _재생(buf, 경로); })
+      .catch(function(e) { console.warn('음악 로드 실패:', e); });
+  });
+}
+
+function 음악_정지() {
+  _정지(null);
+  _현재경로 = null;
+}
 
 /* ─────────────────────────────────────────────────────────────
    [3] 수치 조작 유틸
@@ -1493,105 +1290,88 @@ document.addEventListener('click', function(e) {
 function 씬_렌더링(설정) {
   document.getElementById('롤백_배너').style.display = 'none';
 
+  /* 이미지/영상 슬롯 — Blob URL 방식으로 영상 주입 */
   const 이미지_경로 = 씬_이미지[설정.id] || null;
   const 배경명 = 씬_배경명[설정.id] || 설정.id;
+  const 영상있음 = !!(씬_영상_경로[설정.id]);
 
-  /* ── 스테이지 이미지 영역 ── */
-  const 스테이지 = document.getElementById('씬_스테이지');
-  // 기존 플레이스홀더/이미지 제거 (업로드 버튼 제외)
-  Array.from(스테이지.children).forEach(function(el) {
-    if (!el.classList.contains('씬_이미지_업로드_버튼')) 스테이지.removeChild(el);
-  });
+  /* 플레이스홀더 HTML (영상/이미지 없을 때) */
+  const 미디어_내용 = 이미지_경로
+    ? `<img src="${이미지_경로}" alt="${배경명}">`
+    : `<div class="씬_이미지_플레이스홀더">
+         <div class="플레이스홀더_씬ID">${설정.id}</div>
+         <div class="플레이스홀더_배경명">${배경명}</div>
+         <div class="플레이스홀더_힌트">[ IMAGE SLOT ]</div>
+       </div>`;
 
-  if (이미지_경로) {
-    const img = document.createElement('div');
-    img.className = '씬_이미지_래퍼';
-    img.id = '이미지래퍼_' + 설정.id;
-    img.innerHTML = `<img src="${이미지_경로}" alt="${배경명}" onload="this.classList.add('로딩완료')">`;
-    스테이지.insertBefore(img, 스테이지.firstChild);
-  } else {
-    const ph = document.createElement('div');
-    ph.className = '스테이지_플레이스홀더';
-    ph.id = '이미지래퍼_' + 설정.id;
-    ph.innerHTML = `
-      <div class="플레이스홀더_씬ID_대">${설정.id}</div>
-      <div class="플레이스홀더_배경명_대">${배경명}</div>`;
-    스테이지.insertBefore(ph, 스테이지.firstChild);
-  }
+  const 이미지_HTML = `
+    <div class="씬_이미지_래퍼" id="이미지래퍼_${설정.id}" data-scene="${설정.id}">
+      ${영상있음 ? '<video class="씬_비디오_엘리먼트" muted playsinline loop></video>' : 미디어_내용}
+      <label class="씬_이미지_업로드_버튼">
+        ⬆ 이미지 업로드
+        <input type="file" accept="image/*" onchange="이미지_업로드('${설정.id}', this)">
+      </label>
+    </div>`;
 
-  // 업로드 버튼 연결
-  const 업로드버튼 = document.getElementById('스테이지_업로드_버튼');
-  업로드버튼.style.display = 'flex';
-  const 파일입력 = document.getElementById('스테이지_파일_입력');
-  파일입력.onchange = function() { 이미지_업로드(설정.id, 파일입력); };
-
-  /* ── 대시보드 컬럼1: 씬 정보 ── */
-  document.getElementById('대시_페이즈_텍스트').textContent = 설정.페이즈;
-  document.getElementById('대시_씬ID_텍스트').textContent = 설정.id;
-  document.getElementById('대시_씬제목_텍스트').textContent = 씬_배경명[설정.id] || 설정.id;
-  document.getElementById('대시_위치_텍스트').textContent = 설정.id + ' — ' + (씬_배경명[설정.id] || '').toUpperCase();
-
-  const 판정el = document.getElementById('대시_판정_텍스트');
-  if (설정.판정조건) {
-    판정el.textContent = '▸ ' + 설정.판정조건;
-    판정el.style.display = 'inline-block';
-  } else {
-    판정el.style.display = 'none';
-  }
-
-  /* ── 대시보드 컬럼2: 배경묘사 + 대사 ── */
-  document.getElementById('대시_배경묘사_텍스트').innerHTML = 설정.배경묘사;
-
-  const 대사영역 = document.getElementById('대시_대사_영역');
-  대사영역.innerHTML = 설정.대사목록.map(function(d, i) {
-    const 딜레이 = 0.06 + i * 0.12;
-    return `<div class="대시_대사_블록" style="opacity:0;transform:translateY(6px);animation:페이드업 0.35s ease ${딜레이}s forwards" data-typing-delay="${딜레이 + 0.1}" data-text="${d.텍스트.replace(/"/g,'&quot;')}">
-      <div class="대시_화자명 ${d.화자클래스}">${d.화자명}</div>
-      <div class="대시_대사_텍스트${d.지문여부 ? ' 지문_텍스트' : ''} 타이핑_대기"></div>
+  /* 대사 블록 */
+  const 대사_HTML = 설정.대사목록.map(function(d, i) {
+    return `<div class="대사_블록" style="animation-delay:${0.08 + i * 0.15}s">
+      <div class="화자명 ${d.화자클래스}">${d.화자명}</div>
+      <div class="대사_텍스트${d.지문여부 ? ' 지문_텍스트' : ''}">${d.텍스트}</div>
     </div>`;
   }).join('');
 
-  /* 타이핑 애니메이션 실행 */
-  대사영역.querySelectorAll('[data-typing-delay]').forEach(function(블록) {
-    const 딜레이ms = parseFloat(블록.dataset.typingDelay) * 1000;
-    const 원본텍스트 = 블록.dataset.text;
-    const 텍스트el = 블록.querySelector('.타이핑_대기');
-    setTimeout(function() {
-      타이핑_애니메이션(텍스트el, 원본텍스트);
-    }, 딜레이ms);
-  });
-
-  /* ── 대시보드 컬럼3: 선택지 ── */
-  const 선택지목록 = document.getElementById('대시_선택지_목록');
-  선택지목록.style.display = 'flex';
-  선택지목록.style.flexDirection = 'column';
-  선택지목록.style.gap = '8px';
-  선택지목록.style.flex = '1';
-  선택지목록.style.minHeight = '0';
-  선택지목록.innerHTML = 설정.선택목록.map(function(s) {
+  /* 선택지 버튼 */
+  const 선택지_HTML = 설정.선택목록.map(function(s) {
     const 잠금 = s.잠금여부 || false;
-    // 본문에서 ' — xxx' 패턴 제거 (혁명, 생존, 포기 등 결과 힌트 숨김)
-    const 표시_본문 = s.본문.replace(/\s*[—\-–]\s*.+$/, '').trim();
-    return `<button class="대시_선택_버튼 ${s.색클래스}${잠금 ? ' 잠금' : ''}"
+    return `<button class="선택지_버튼 ${s.색클래스}${잠금 ? ' 잠금' : ''}"
         onclick="${잠금 ? '' : `선택_처리('${s.액션}')`}"
         ${잠금 ? 'title="조건 미충족"' : ''}>
-      <div class="홀로_스캔"></div>
-      <div class="홀로_코너 좌상"></div>
-      <div class="홀로_코너 우상"></div>
-      <div class="홀로_코너 좌하"></div>
-      <div class="홀로_코너 우하"></div>
-      <div class="대시_선택_레이블">[${s.레이블}]</div>
-      <div class="대시_선택_내용">
-        <div class="대시_선택_본문">${표시_본문}</div>
+      <div class="선택지_레이블">[${s.레이블}]</div>
+      <div class="선택지_내용">
+        <div class="선택지_본문">${s.본문}</div>
+        <div class="선택지_효과">${s.효과설명}</div>
+        ${잠금 && s.잠금안내 ? `<div class="선택지_잠금_안내">🔒 ${s.잠금안내}</div>` : ''}
       </div>
     </button>`;
   }).join('');
 
-  /* 등장 애니메이션 */
-  const 대시 = document.getElementById('씬_대시보드');
-  대시.style.animation = 'none';
-  void 대시.offsetWidth;
-  대시.style.animation = '씬_등장 0.28s ease';
+  const 판정_태그 = 설정.판정조건
+    ? `<div class="씬_판정_태그">▸ ${설정.판정조건}</div>` : '';
+
+  /* 주입 */
+  document.getElementById('씬_패널').innerHTML = `
+    ${이미지_HTML}
+    <div class="씬_내부">
+      <div class="씬_메타">
+        <div class="씬_ID_태그">${설정.id}</div>
+        <div class="씬_페이즈_태그">${설정.페이즈}</div>
+        ${판정_태그}
+      </div>
+      <div class="씬_배경묘사">${설정.배경묘사}</div>
+      <div id="대사_영역">${대사_HTML}</div>
+      <div id="선택지_영역">${선택지_HTML}</div>
+    </div>`;
+
+  /* 등장 애니메이션 재실행 */
+  const 패널 = document.getElementById('씬_패널');
+  패널.style.animation = 'none';
+  void 패널.offsetWidth;
+  패널.style.animation = '씬_등장 0.28s ease';
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  /* 영상 Blob URL 비동기 주입 — innerHTML 직후 실행 */
+  const 비디오엘 = document.querySelector('#이미지래퍼_' + 설정.id + ' .씬_비디오_엘리먼트');
+  if (비디오엘) {
+    setTimeout(function() {
+      const url = 씬_영상_경로[설정.id] || null;
+      if (url) {
+        비디오엘.src = url;
+        비디오엘.play().catch(function(){});
+      }
+    }, 0);
+  }
 }
 
 /* ─────────────────────────────────────────────────────────────
@@ -1604,8 +1384,11 @@ function 이미지_업로드(씬ID, 입력) {
   씬_이미지[씬ID] = URL경로;
   const 래퍼 = document.getElementById('이미지래퍼_' + 씬ID);
   if (래퍼) {
-    래퍼.className = '씬_이미지_래퍼';
-    래퍼.innerHTML = `<img src="${URL경로}" alt="${씬_배경명[씬ID]}" onload="this.classList.add('로딩완료')">`;
+    래퍼.innerHTML = `
+      <img src="${URL경로}" alt="${씬_배경명[씬ID]}" onload="this.classList.add('로딩완료')">
+      <label class="씬_이미지_업로드_버튼">⬆ 이미지 교체
+        <input type="file" accept="image/*" onchange="이미지_업로드('${씬ID}', this)">
+      </label>`;
   }
   로그추가(`[${씬ID}] 이미지 업로드 완료.`, '성공');
 }
@@ -1759,7 +1542,7 @@ function 씬_RE_S4() {
       { 화자클래스:'화자_시스템', 화자명:'SYSTEM',
         텍스트:'치명적 오류. <span class="강조_빨강">세이브 포인트로 로그를 복구합니다.</span>', 지문여부:false },
       { 화자클래스:'화자_오빠', 화자명:'큰오빠',
-        텍스트:`"이 감각... 벌써 ${게임상태.루프횟수 + 1}번째지? 머리가 깨질 것 같아."`, 지문여부:false },
+        텍스트:'"이 감각... 벌써 몇 번째지? 머리가 깨질 것 같아."', 지문여부:false },
     ],
     선택목록:[
       { 레이블:'A', 색클래스:'색_시안', 본문:'루프 재시도',
@@ -1804,10 +1587,43 @@ function 씬_S6() {
   });
 }
 
+
+/* ─────────────────────────────────────────────────────────────
+   [0] 스타트 화면 제어
+───────────────────────────────────────────────────────────── */
+function 게임_시작() {
+  /* START 버튼 onclick = 사용자 제스처 컨텍스트
+     여기서 AudioContext 생성 + resume() 해야 크롬이 허용 */
+  _ctx_언락().then(function() {
+    /* resume() 완료(= ctx.state === 'running') 후 음악 재생 */
+    음악_재생(씬_음악_경로['S1']);
+  });
+
+  /* 화면 전환 (음악과 무관하게 즉시) */
+  document.getElementById('스타트_화면').classList.add('숨김');
+  document.getElementById('헤더').style.display = '';
+  document.getElementById('본문').style.display = 'flex';
+  씬_이동('S1');
+}
+
+function 스타트_화면_표시() {
+  document.getElementById('스타트_화면').classList.remove('숨김');
+  document.getElementById('엔딩_화면').style.display = 'none';
+  document.getElementById('본문').style.display = 'none';
+  게임상태 = { 증거:0, 신뢰:0, 오염:0, 위험:0, 어드민키:false, s2선택:null, 루프횟수:0 };
+  수치_UI_전체갱신();
+  const vw = document.getElementById('엔딩_비디오_래퍼');
+  if (vw) { const v = vw.querySelector('video'); if(v){v.pause();v.src='';} }
+  /* 음악 정지 — AudioContext는 유지 (재진입 시 즉시 재생 가능) */
+  음악_정지();
+}
+
 /* ─────────────────────────────────────────────────────────────
    [8] 씬 이동 디스패처
 ───────────────────────────────────────────────────────────── */
 function 씬_이동(씬ID) {
+  /* 음악은 선택_처리()와 게임_시작()에서 직접 호출
+     씬_이동 자체에서는 렌더링만 담당 */
   const 맵 = { S1:씬_S1, S2:씬_S2, S3:씬_S3, S4:씬_S4, S5:씬_S5, RE_S4:씬_RE_S4, S6:씬_S6 };
   if (맵[씬ID]) 맵[씬ID]();
 }
@@ -1818,33 +1634,39 @@ function 씬_이동(씬ID) {
 function 선택_처리(액션) {
   document.querySelectorAll('.선택지_버튼').forEach(function(b) { b.disabled = true; });
 
+  /* 다음 씬 ID를 파악해서 음악 미리 전환 */
+  function _씬전환(다음씬) {
+    음악_재생(씬_음악_경로[다음씬] || null);
+    setTimeout(function(){ 씬_이동(다음씬); }, 440);
+  }
+
   switch (액션) {
     case 'S1_A':
       수치변경({ 신뢰:20, 증거:-5 });
       로그추가('S1 [A] 즉시 보고. Trust_f +20 / Evidence -5', '경고');
-      setTimeout(function(){ 씬_이동('S2'); }, 440); break;
+      _씬전환('S2'); break;
 
     case 'S1_B':
       수치변경({ 증거:20, 신뢰:-10 });
       로그추가('S1 [B] 비밀 조사 개시. Evidence +20 / Trust_f -10', '일반');
-      setTimeout(function(){ 씬_이동('S2'); }, 440); break;
+      _씬전환('S2'); break;
 
     case 'S2_A':
       게임상태.s2선택 = 'A';
       수치변경({ 증거:20, 위험:10 });
       로그추가('S2 [A] 심층 데이터 추출. Evidence +20 / Risk +10', '일반');
-      setTimeout(function(){ 씬_이동('S3'); }, 440); break;
+      _씬전환('S3'); break;
 
     case 'S2_B':
       게임상태.s2선택 = 'B';
       수치변경({ 신뢰:10 });
       로그추가('S2 [B] 흔적만 확인. Trust_f +10', '경고');
-      setTimeout(function(){ 씬_이동('S3'); }, 440); break;
+      _씬전환('S3'); break;
 
     case 'S3_A':
       수치변경({ 오염:20 });
       로그추가('S3 [A] 주사 수락. Corruption +20', '경고');
-      setTimeout(function(){ 씬_이동('S4'); }, 440); break;
+      _씬전환('S4'); break;
 
     case 'S3_B':
       if (게임상태.s2선택 === 'A') {
@@ -1854,31 +1676,31 @@ function 선택_처리(액션) {
         수치변경({ 증거:10 });
         로그추가('S3 [B] 주사 거부. Evidence +10', '일반');
       }
-      setTimeout(function(){ 씬_이동('S4'); }, 440); break;
+      _씬전환('S4'); break;
 
     case 'S4_A':
       수치변경({ 어드민키:true, 오염:10 });
       로그추가('S4 [A] 데이터 동기화 성공. ADMIN_KEY 획득.', '성공');
-      setTimeout(function(){ 씬_이동('S6'); }, 440); break;
+      _씬전환('S6'); break;
 
     case 'S4_B':
       수치변경({ 어드민키:false, 위험:15 });
       로그추가('S4 [B] 거부 및 도주. Risk +15.', '에러');
-      setTimeout(function(){ 씬_이동('S5'); }, 440); break;
+      _씬전환('S5'); break;
 
     case 'S5_A':
       수치변경({ 어드민키:true });
       로그추가('S5 [A] 게이트 해킹 성공. ADMIN_KEY 획득.', '성공');
-      setTimeout(function(){ 씬_이동('S6'); }, 440); break;
+      _씬전환('S6'); break;
 
     case 'S5_B':
       로그추가('S5 [B] 추격 실패. 로그 롤백 발생.', '에러');
-      setTimeout(function(){ 씬_이동('RE_S4'); }, 440); break;
+      _씬전환('RE_S4'); break;
 
     case 'RE_재시도':
       게임상태.루프횟수++;
       로그추가(`RE_S4 [A] 루프 재시도 (${게임상태.루프횟수}회차). S4 회귀.`, '경고');
-      setTimeout(function(){ 씬_이동('S4'); }, 440); break;
+      _씬전환('S4'); break;
 
     case 'RE_포기':
       로그추가('RE_S4 [B] 로그 수용. 소거 진행 중...', '에러');
@@ -1906,18 +1728,21 @@ function 엔딩_표시(유형) {
       제목:'혁명가', 부제:'REVOLUTIONARY — TRUE END', 부제색:'var(--색_빨강)',
       본문:'타워의 모든 스크린에 누이의 로그가 출력된다.<br>계급 체계가 무너지고 시스템은 정지한다.<br>유전자 낙인이 사라진 세계가, 잠시 숨을 멈춘다.',
       선색:'var(--색_빨강)',
+      
     },
     생존: {
       클래스:'생존자', 분류:'ENDING B / SURVIVAL DOMINANT — 생존자 (NEUTRAL END)',
       제목:'생존자', 부제:'SURVIVOR — NEUTRAL END', 부제색:'var(--색_앰버)',
       본문:'홀로 붉은 사막으로 걸어 나간다.<br>등 뒤의 타워는 여전히 차갑고 고요하게 작동 중이다.<br>진실은 가슴 속에만 남겨진 채, 두 발은 앞으로.',
       선색:'var(--색_앰버)',
+      
     },
     소거: {
       클래스:'소거됨', 분류:'GAME OVER / LOG DELETED',
       제목:'LOG DELETED', 부제:'SYSTEM PURGE COMPLETE', 부제색:'#4a6a7a',
       본문:'[LOG DELETED]<br>큰오빠의 데이터가 타워에서 완전히 세척되었다.<br>다시는 의심이 싹트지 않으리라.',
       선색:'#4a6a7a',
+      
     },
   };
 
@@ -1932,12 +1757,27 @@ function 엔딩_표시(유형) {
 
   document.getElementById('본문').style.display = 'none';
 
+  /* 씬 음악 정지 */
+  음악_정지();
+
+  /* 엔딩 영상 Blob URL 주입 */
+  const 비디오래퍼 = document.getElementById('엔딩_비디오_래퍼');
+  비디오래퍼.innerHTML = '<video class="엔딩_영상" muted playsinline loop style="width:100%;height:100%;object-fit:contain;display:block;background:#000"></video>';
+  setTimeout(function() {
+    const url = 엔딩_영상_경로[유형] || null;
+    const v = 비디오래퍼.querySelector('video');
+    if (url && v) { v.src = url; v.play().catch(function(){}); }
+    else if (비디오래퍼) { 비디오래퍼.style.display = 'none'; }
+  }, 0);
+
   const 화면 = document.getElementById('엔딩_화면');
+  화면.style.display = 'block';
   화면.style.opacity = '0';
   화면.style.transition = 'opacity 0.8s ease';
-  화면.classList.add('보임');
 
   document.getElementById('엔딩_내부_컨텐츠').innerHTML = `
+    ${엔딩.이미지 ? `<div class="엔딩_이미지_슬롯"><img src="${엔딩.이미지}" alt="${엔딩.제목}"></div>` : ''}
+    <div class="엔딩_분류">${엔딩.분류}</div>
     <div class="엔딩_제목 ${엔딩.클래스}">${엔딩.제목}</div>
     <div class="엔딩_부제" style="color:${엔딩.부제색}">${엔딩.부제}</div>
     <div class="엔딩_구분선" style="background:${엔딩.선색}"></div>
@@ -1967,247 +1807,18 @@ function 엔딩_표시(유형) {
    [11] 게임 재시작
 ───────────────────────────────────────────────────────────── */
 function 게임_재시작() {
-  게임상태 = { 증거:0, 신뢰:0, 오염:0, 위험:0, 어드민키:false, s2선택:null, 루프횟수:0 };
-  수치_UI_전체갱신();
-  const 화면 = document.getElementById('엔딩_화면');
-  화면.classList.remove('보임');
-  화면.style.opacity = '';
-  document.getElementById('본문').style.display = 'flex';
-  document.getElementById('로그_내용').innerHTML = '';
-  로그_카운터 = 0;
-  로그추가('시스템 재초기화. 검증관 ID: ΩK-001 재접속.', '일반');
-  씬_이동('S1');
+  /* 엔딩에서 RESTART 누르면 스타트 화면으로 복귀
+     언락 상태 유지 → 다음 START 클릭 시 음악 바로 재생 */
+  document.getElementById('엔딩_화면').style.display = 'none';
+  스타트_화면_표시();
 }
 
 /* ═══════════════════════════════════════════════
-   [NEW] 타이핑 애니메이션 엔진
+   [12] 진입점 — 스타트 화면 표시
 ═══════════════════════════════════════════════ */
-function 타이핑_애니메이션(el, html문자열, 속도) {
-  속도 = 속도 || 28;
-  /* HTML 태그를 제거한 순수 텍스트와 HTML 구분 */
-  const 임시 = document.createElement('div');
-  임시.innerHTML = html문자열;
-  const 순수텍스트 = 임시.textContent;
-  const HTML있음 = html문자열 !== 순수텍스트;
-
-  if (HTML있음) {
-    /* HTML 포함 시 단어 단위로 빠르게 */
-    el.innerHTML = '';
-    el.classList.add('타이핑_텍스트');
-    const 단어들 = html문자열.split(/(?<=>\s*)|(?=\s*<)/);
-    let i = 0;
-    function 다음단어() {
-      if (i >= 단어들.length) {
-        el.classList.remove('타이핑_텍스트');
-        el.classList.add('타이핑_완료');
-        return;
-      }
-      el.innerHTML += 단어들[i++];
-      setTimeout(다음단어, 속도 * 1.5);
-    }
-    다음단어();
-  } else {
-    /* 순수 텍스트 — 글자 단위 타이핑 */
-    el.textContent = '';
-    el.classList.add('타이핑_텍스트');
-    let i = 0;
-    function 다음글자() {
-      if (i >= 순수텍스트.length) {
-        el.classList.remove('타이핑_텍스트');
-        el.classList.add('타이핑_완료');
-        return;
-      }
-      el.textContent += 순수텍스트[i++];
-      setTimeout(다음글자, 속도 + Math.random() * 18);
-    }
-    다음글자();
-  }
-}
-
-/* ═══════════════════════════════════════════════
-   [NEW] 동적 배경 파티클 시스템
-═══════════════════════════════════════════════ */
-(function() {
-  const cv = document.getElementById('파티클_캔버스');
-  const ctx = cv.getContext('2d');
-  const 파티클들 = [];
-  const 파티클수 = 55;
-
-  function 리사이즈() {
-    cv.width = window.innerWidth;
-    cv.height = window.innerHeight;
-  }
-  window.addEventListener('resize', 리사이즈);
-  리사이즈();
-
-  const 색상들 = ['0,229,255','255,45,74','255,179,0','0,255,136','204,68,255'];
-
-  for (let i = 0; i < 파티클수; i++) {
-    파티클들.push({
-      x: Math.random() * window.innerWidth,
-      y: Math.random() * window.innerHeight,
-      vx: (Math.random() - 0.5) * 0.35,
-      vy: (Math.random() - 0.5) * 0.35 - 0.1,
-      r: Math.random() * 1.5 + 0.3,
-      색: 색상들[Math.floor(Math.random() * 색상들.length)],
-      알파: Math.random() * 0.5 + 0.15,
-      반짝임: Math.random() * Math.PI * 2,
-      반짝임속도: Math.random() * 0.02 + 0.005,
-      연결거리: Math.random() * 80 + 40,
-    });
-  }
-
-  function 루프() {
-    ctx.clearRect(0, 0, cv.width, cv.height);
-
-    파티클들.forEach(function(p, i) {
-      p.x += p.vx; p.y += p.vy;
-      p.반짝임 += p.반짝임속도;
-      const 현재알파 = p.알파 * (0.6 + 0.4 * Math.sin(p.반짝임));
-
-      if (p.x < 0) p.x = cv.width;
-      if (p.x > cv.width) p.x = 0;
-      if (p.y < 0) p.y = cv.height;
-      if (p.y > cv.height) p.y = 0;
-
-      /* 파티클 그리기 */
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(${p.색},${현재알파})`;
-      ctx.fill();
-
-      /* 가까운 파티클끼리 선 연결 */
-      for (let j = i + 1; j < 파티클들.length; j++) {
-        const q = 파티클들[j];
-        const dx = p.x - q.x, dy = p.y - q.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < p.연결거리) {
-          const 선알파 = (1 - dist / p.연결거리) * 0.12;
-          ctx.beginPath();
-          ctx.moveTo(p.x, p.y);
-          ctx.lineTo(q.x, q.y);
-          ctx.strokeStyle = `rgba(${p.색},${선알파})`;
-          ctx.lineWidth = 0.4;
-          ctx.stroke();
-        }
-      }
-    });
-
-    requestAnimationFrame(루프);
-  }
-  루프();
-})();
-
-/* ═══════════════════════════════════════════════
-   [NEW] 실시간 노이즈 오버레이
-═══════════════════════════════════════════════ */
-(function() {
-  const cv = document.getElementById('노이즈_캔버스');
-  const ctx = cv.getContext('2d');
-
-  function 리사이즈() {
-    cv.width = window.innerWidth;
-    cv.height = window.innerHeight;
-  }
-  window.addEventListener('resize', 리사이즈);
-  리사이즈();
-
-  let 프레임 = 0;
-  function 노이즈_루프() {
-    프레임++;
-    if (프레임 % 3 === 0) { /* 초당 약 20프레임만 갱신 (성능) */
-      const w = cv.width, h = cv.height;
-      const id = ctx.createImageData(w, h);
-      const data = id.data;
-      for (let i = 0; i < data.length; i += 4) {
-        const v = Math.random() * 255 | 0;
-        data[i] = v; data[i+1] = v; data[i+2] = v;
-        data[i+3] = Math.random() * 18 | 0;
-      }
-      ctx.putImageData(id, 0, 0);
-    }
-    requestAnimationFrame(노이즈_루프);
-  }
-  노이즈_루프();
-})();
-
-/* ═══════════════════════════════════════════════
-   [NEW] 스모그 레이어 생성
-═══════════════════════════════════════════════ */
-(function() {
-  const 컨테이너 = document.getElementById('스모그_레이어');
-  const 설정들 = [
-    { w:600, h:400, x:10,  y:20,  dx:80,  dy:-50, dur:18, delay:0,   색:'0,229,255',   최대불투명:0.055 },
-    { w:500, h:350, x:50,  y:55,  dx:-60, dy:-30, dur:22, delay:5,   색:'255,45,74',   최대불투명:0.04  },
-    { w:700, h:500, x:20,  y:30,  dx:40,  dy:-80, dur:27, delay:9,   색:'0,60,90',     최대불투명:0.07  },
-    { w:450, h:300, x:60,  y:10,  dx:-80, dy:40,  dur:20, delay:3,   색:'204,68,255',  최대불투명:0.035 },
-    { w:800, h:600, x:5,   y:70,  dx:60,  dy:-40, dur:32, delay:14,  색:'0,30,50',     최대불투명:0.08  },
-    { w:380, h:280, x:75,  y:40,  dx:-40, dy:-60, dur:15, delay:7,   색:'255,179,0',   최대불투명:0.025 },
-  ];
-
-  설정들.forEach(function(s) {
-    const el = document.createElement('div');
-    el.className = '스모그_클라우드';
-    el.style.cssText = `
-      width:${s.w}px; height:${s.h}px;
-      left:${s.x}%; top:${s.y}%;
-      background: radial-gradient(ellipse, rgba(${s.색},0.4) 0%, transparent 70%);
-      --스모그_dx: ${s.dx}px;
-      --스모그_dy: ${s.dy}px;
-      --스모그_최대_불투명: ${s.최대불투명};
-      animation-duration: ${s.dur}s;
-      animation-delay: ${s.delay}s;
-    `;
-    컨테이너.appendChild(el);
-  });
-})();
-
-/* ═══════════════════════════════════════════════
-   [NEW] RGB 글리치 슬라이스 생성
-═══════════════════════════════════════════════ */
-(function() {
-  const 컨테이너 = document.getElementById('글리치_오버레이');
-  const 슬라이스_설정 = [
-    { top:15, h:2,  오프셋:-12, 색:'rgba(255,0,80,0.2)',   주기:3.7, 딜레이:0   },
-    { top:35, h:4,  오프셋:8,   색:'rgba(0,229,255,0.18)', 주기:5.1, 딜레이:1.2 },
-    { top:58, h:2,  오프셋:-6,  색:'rgba(255,0,80,0.15)',  주기:4.3, 딜레이:0.7 },
-    { top:72, h:6,  오프셋:14,  색:'rgba(0,229,255,0.12)', 주기:6.8, 딜레이:2.5 },
-    { top:25, h:1,  오프셋:-18, 색:'rgba(255,179,0,0.2)',  주기:2.9, 딜레이:0.4 },
-    { top:88, h:3,  오프셋:10,  색:'rgba(204,68,255,0.15)',주기:7.2, 딜레이:3.1 },
-    { top:45, h:8,  오프셋:-5,  색:'rgba(255,0,80,0.1)',   주기:9.0, 딜레이:1.8 },
-    { top:63, h:1,  오프셋:20,  색:'rgba(0,229,255,0.25)', 주기:4.6, 딜레이:0.9 },
-  ];
-
-  슬라이스_설정.forEach(function(s) {
-    const el = document.createElement('div');
-    el.className = '글리치_슬라이스';
-    el.style.cssText = `
-      top:${s.top}%;
-      --슬라이스_높이: ${s.h}px;
-      --슬라이스_색: ${s.색};
-      --슬라이스_오프셋: ${s.오프셋}px;
-      --슬라이스_주기: ${s.주기}s;
-      --슬라이스_딜레이: ${s.딜레이}s;
-    `;
-    컨테이너.appendChild(el);
-  });
-})();
-
-/* ═══════════════════════════════════════════════
-   [NEW] 시작화면 닫기
-═══════════════════════════════════════════════ */
-function 시작화면_닫기() {
-  const 시작 = document.getElementById('시작_화면');
-  시작.classList.add('페이드아웃');
-  setTimeout(function() {
-    시작.style.display = 'none';
-  }, 1300);
-}
-
-/* ═══════════════════════════════════════════════
-   [12] 게임 진입점
-═══════════════════════════════════════════════ */
-씬_이동('S1');
+/* 초기: 헤더/본문 숨김 */
+document.getElementById('헤더').style.display = 'none';
+document.getElementById('본문').style.display = 'none';
 </script>
 </body>
 </html>
